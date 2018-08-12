@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>销售订单</title>
+    <link rel="stylesheet" href="public/css/flexible.css">
+    <link rel="stylesheet" href="public/font/iconfont.css?v=12">
+    <link rel="stylesheet" href="public/css/public.css?v=432">
+    <link rel="stylesheet" href="public/components/jk-component.css?v=23221">
+    <script src="public/js/flexible.js"></script>
+
+    <script src="core/rAndroid.js?v=ffffd3"></script>
+    <script src="public/components/jk-component.js?V=12222"></script>
+    <style>
+        #app {
+            padding-top:.8rem;
+            font-size: .35rem;
+        }
+        .title {font-size:.8rem;margin-top:1.2em;}
+        .content {
+            text-align: center;
+            padding:.5em 0 1rem ;
+        }
+        .item-group {margin-top:.8em;background:#fff;}
+        #app .input-border-primary {border:none;}
+        #app .input-readonly {border:none !important;}
+        #app .input-readonly:focus {background:inherit;border:none !important;}
+        .info-item {
+            display: flex;
+            align-items: center;
+            margin: 0 5%;
+            padding: .5em 0;
+            background:#fff;
+            border-bottom:1px solid #f1f1f1;
+        }
+
+        .info-item .tag {
+            text-align: left;
+            width: 10em;
+            padding-right: .5em;
+        }
+        .info-item .con {display: flex;align-items: center;}
+        .info-item .con .text {width: 3em; padding-right:1em;}
+        .info-item .con .icon {width: 1em;margin-left:-1em;}
+        .info-item input {padding-right:1.3em;}
+        .time-range {flex:1;}
+        .line-divide {height:1px;background:#e1e1e1;margin:1em .5em;}
+
+        /*分页导航*/
+        .list-title-common {display: flex;justify-content: space-around;}
+        .left-text {flex:1;}
+        .right-btns {flex:1;text-align: right;}
+
+        .page-btn {display: inline-block;vertical-align: middle;width:1.6em;height:1.6em;color:#fff;border-radius:50%;text-align: center;line-height:1.6em;font-size:.8em;}
+        .page-btn:nth-child(1) {background:linear-gradient(90deg,#0070FF,#1F81FF);}
+        .page-btn:nth-child(2) {background:linear-gradient(90deg,#1F81FF,#3990FF);}
+        .page-btn:nth-child(3) {background:linear-gradient(90deg,#3990FF,#52A0FF);}
+        .page-btn:nth-child(4) {background:linear-gradient(90deg,#52A0FF,#6AADFF);}
+
+        /*订单子项*/
+        .sale-list {margin: 1em 0;padding:.5em 3%;border-radius:.3em;background: #D1F0FA;}
+        .sale-list .item-group {margin-top:0;position: relative;font-size:.32rem;}
+        .sale-list .item-group:before {content:'';display: block;width: 1em;height:1em;border-radius:50%;background:#D1F0FA;position: absolute;left:-.7em;top:-.5em;}
+        .sale-list .item-group:after {content:'';display: block;width: 1em;height:1em;border-radius:50%;background:#D1F0FA;position: absolute;right:-.7em;top:-.5em;}
+        .sale-list .item-group:first-child:before {display: none;}
+        .sale-list .item-group:first-child:after {display: none;}
+        .sale-item {margin-top:.8em;border-radius:.3em;}
+        .sale-item-title {padding-left:1em;font-size:1.1em;color:#fff;background:#D1F0FA;}
+
+        .add-bill {box-sizing:border-box;width: 50%;font-size:.9em;}
+        select.input-border-primary {padding-left:.1em;}
+    </style>
+</head>
+<body>
+<div id='app' v-cloak>
+    <jk-more-list v-on:add="add" v-on:giveup="giveup" v-on:update="update" v-on:submit="submit" v-on:listclick="listclick"></jk-more-list>
+
+    <div class="list-title-common" v-cloak>
+        <span class="left-text" v-html="status || '展示'"></span>
+        <span class="right-btns" v-show="curd">
+            <span class="page-btn  click-effect">首</span>
+            <span class="page-btn  click-effect">上</span>
+            <span class="page-btn  click-effect">下</span>
+            <span class="page-btn  click-effect">尾</span>
+        </span>
+    </div>
+    <div class="content" v-cloak>
+        <div class="info-main">
+            <div class="item-group" v-if="bills.head" >
+                <!--<jk-bill-entry-->
+                    <!--v-if="headField.type-0 === 1"-->
+                    <!--tag="headField.text"-->
+                    <!--:value="bills.head[headField.name]"-->
+                    <!--v-on:input="bills.head[headField.name]=$event"-->
+                    <!--:disabled="!isEdit"-->
+                    <!--:show-pick="isEdit"-->
+                    <!--v-on:set-data="pickDataCallBack"-->
+                    <!--index="-1"-->
+                    <!--:require="{-->
+                      <!--field:'',-->
+                      <!--rb:[]-->
+                    <!--}"-->
+                <!--&gt;</jk-bill-entry>-->
+                <div class="info-item" v-for="headField in headFieldsArr">
+                    <div class="tag">{{headField.text}}:</div>
+                    <div class="con" v-if="headField.type-0 === 1">
+                        <input type="text" class="car-user input-border-primary"
+                               :placeholder="headField.text"
+                               v-model="bills.head[headField.name]"
+                               :disabled="!isEdit"
+                        >
+                        <i class="icon iconfont jk-pick-item click"
+                           @click="pickData('common-dir',-1,headField.name)"
+                           v-show="isEdit && headField.getSearch-0 === 1"
+                        ></i>
+                    </div>
+                    <select type="text" class=" input-border-primary"
+                            :disabled="!isEdit"
+                            v-if="headField.type-0 === 2"
+                    >
+                        <option v-for="op in headField.selectArr" :value="op.id">{{op.name}}</option>
+                    </select>
+                </div>
+
+            </div>
+            <div class="sale-list" v-if="bills.billList" v-cloak>
+                <div class="sale-item" v-for="(bill,index) in bills.billList" v-longtap="{fn:delBill,arr:bills.billList,index:index}">
+                    <div class="item-group" ><!--v-for="product in pushTaskData.products" -->
+                        <div class="info-item" v-for="field in fieldsArr">
+                            <div class="tag">{{field.text}}</div>
+                            <div class="con">
+                                <input v-if="field.type-0 === 1" type="text"
+                                       class="car-user input-border-primary"
+                                       :placeholder="bill[field.name]"
+                                       v-model="bill[field.name]"
+                                       :disabled="!isEdit"
+                                       >
+                                <i class="icon iconfont jk-pick-item click"
+                                   @click="pickData('common-dir',index,field.name)"
+                                   v-if="isEdit && field.getSearch-0 === 1"
+                                ></i>
+                                <select  class=" input-border-primary"
+                                         v-if="field.type-0 === 2"
+                                         :disabled="!isEdit">
+                                    <option v-for="op in field.selectArr" :value="op.id">{{op.name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="jk-submit add-bill" v-show="isEdit" @click="addNewItem">新增</div>
+            </div>
+            </div>
+        </div>
+        <!--<div class="jk-submit no-radius" v-show="type==='check'" @click="changeTo('check-bill')">立即审核</div>-->
+    </div>
+</div>
+</body>
+
+</html>

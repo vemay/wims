@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>存货明细看板</title>
+    <!--<link rel="stylesheet" href="public/mint-ui/mint-ui-rem.css?v=12">-->
+    <link rel="stylesheet" href="public/css/flexible.css">
+    <link rel="stylesheet" href="public/font/iconfont.css?v=12">
+    <link rel="stylesheet" href="public/css/public.css?v=a22">
+    <link rel="stylesheet" href="public/css/animate.css?v=1">
+    <link rel="stylesheet" href="public/components/jk-component.css?v=33">
+    <link rel="stylesheet" href="public/mint-ui/mint-ui.css?v=21">
+    <link rel="stylesheet" href="public/lCalendar/lCalendar.css">
+    
+    <script src="public/js/flexible.js"></script>
+    <script src="core/vue.js?v=13"></script>
+    <script src="core/rAndroid.js?v=2"></script>
+    <script src="core/jquery-1.8.3.min.js?v=2"></script>
+    <script src="public/components/jk-component.js?v=333"></script>
+    <script src="public/lCalendar/lCalendar20180725.js?v=11dd"></script>
+    <script src="public/mint-ui/mint-ui.js"></script>
+    <!--<script src="public/mint-ui/mint-ui.js?v=1"></script>-->
+    <!--<script src="core/require.js?v=1" data-main="core/main"></script>-->
+    <style>
+        .list {height:8rem;padding:.5em;overflow-y:auto;background:#f00;}
+        .sub {font-size:.5rem;width: 100%;height:auto; padding:.5em;}
+        .text {font-size:.5rem;padding:2em;}
+        .con {width: 3rem;height:1rem;  border:1px solid #3EA53E;display: inline-block;background:#3990FF;white-space: normal;}
+        .fade-enter {transform: translateX(100%);}
+        .fade-enter-active {transition:transform .3s ease-in;}
+        .fade-leave-active {transition:transform .3s ease-out;}
+        .fade-leave-to {transform:translateX(100%)}
+        .custom-textarea {}
+        .jk-radio-label {display: block;margin-bottom: 1em;border-top:1px solid #fff;position: relative;}
+        .jk-radio-label input { position: absolute;left:0;top:0;opacity: 0;}
+        .jk-radio-label input:checked+.text  { color:#f00;}
+    </style>
+</head>
+<body>
+    <div class="imgs">
+      <div class="img-item"><img src="public/images/banner-login.png"><span class="reUp">重新上传</span></div>
+      <div class="img-item"><img src="public/images/banner-login.png"><span class="reUp">重新上传</span></div>
+      <div class="img-item"><img src="public/images/banner-login.png"><span class="reUp">重新上传</span></div>
+    </div>
+    <div class="jk-submit pushImg">点一点</div>
+    <div id='app' v-cloak>
+        <mt-datetime-picker
+          ref="picker"
+          type="date"
+          v-model="pickerValue">
+        </mt-datetime-picker>
+        <button class="jk-submit" @click="doTest">测试</button>
+        <div>
+            <div class="title">这里开始</div>
+          <p>{{da}}</p>
+        </div>
+    </div>
+</body>
+<script>
+  var defaultSrc = 'public/images/banner-login.png';
+  var sourceSrc = 'public/images/arrow-down.png';
+  $('.pushImg').click(function(){
+    $('.img-item').each(function(i,ele){
+      var src = $(this).children('img').attr('src');
+      if ( src === '' || src === defaultSrc ) {
+        $(this).children('img').attr('src',sourceSrc);
+        return false;
+      }
+    });
+  });
+  
+  $('.reUp').click(function() {
+    $(this).prev().attr('src','');
+  });
+ 
+  function getSourceSrc (mark) {
+    this.getPostData('接口',function() {
+    
+    })
+  }
+  
+  
+    new Vue({
+      el:'#app',
+      data:{
+        pickerValue:'2018-01-01'
+      },
+      mounted:function () {
+      },
+      methods: {
+        openPicker:function () {
+          this.$refs.picker.open();
+        }
+      },
+    })
+</script>
+<!--<script>-->
+  <!---->
+    <!--new Vue({-->
+      <!--el:'#app',-->
+      <!--data: function () {-->
+        <!--return {-->
+          <!--show:false,-->
+          <!--pickerVisible:'2018-06-29 16:30:00',-->
+          <!--testStr:'0001',-->
+          <!--da:'2018-07-31T20:28:08',-->
+          <!--value:[],-->
+          <!--l:[],-->
+          <!--allLoaded:false,-->
+          <!--list:[-->
+            <!--{name:'1',value:1},-->
+            <!--{name:'2',value:2},-->
+            <!--{name:'3',value:3},-->
+            <!--{name:'4',value:4},-->
+            <!--{name:'5',value:5},-->
+            <!--{name:'6',value:6},-->
+          <!--],-->
+          <!--selectVal:2,-->
+          <!--selectArr:[],-->
+          <!--radioArr:[{value:1,text:'第一个'},{value:2,text:'第二个'}]-->
+        <!--}-->
+      <!--},-->
+      <!--methods:{-->
+        <!--doTest:function () {-->
+         <!--var d = new Date('2018-07-31T20:28:08');-->
+         <!---->
+        <!--},-->
+        <!--initPush:function () {-->
+          <!--var t = this;-->
+          <!--var ajpush = api.require('ajpush');-->
+          <!--ajpush.init(function(ret) {-->
+            <!--if (ret && ret.status){-->
+              <!--//success-->
+              <!--ajpush.getRegistrationId(function(ret) {-->
+                <!--var registrationId = ret.id;-->
+                <!--alertMy(registrationId)-->
+              <!--})-->
+            <!--}-->
+          <!--});-->
+        <!--},-->
+        <!--bindPush:function () {-->
+          <!--var ajpush = api.require('ajpush');-->
+          <!--var param = {alias:'myalias',tags:['tag1','tag2']};-->
+          <!--ajpush.bindAliasAndTags(param,function(ret) {-->
+            <!--var statusCode = ret.statusCode;-->
+          <!--});-->
+        <!--},-->
+      <!--},-->
+      <!--mounted:function () {-->
+        <!--var t = this;-->
+      <!---->
+      <!--}-->
+    <!--})-->
+<!--</script>-->
+</html>

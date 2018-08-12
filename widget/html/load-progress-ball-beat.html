@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>加载动画</title>
+    <link rel="stylesheet" href="public/css/flexible.css?v=1">
+    <link rel="stylesheet" href="public/css/public.css?v=better">
+    <script src="public/js/flexible.js"></script>
+    <!--<script src="core/rAndroid.js?v=fffd"></script>-->
+    <style>
+        /*加载动画*/
+        /*三点加载动画*/
+        @-webkit-keyframes ball-beat {
+            50% {
+                opacity: .2;
+                -webkit-transform: scale(.75);
+                transform: scale(.75)
+            }
+            100% {
+                opacity: 1;
+                -webkit-transform: scale(1);
+                transform: scale(1)
+            }
+        }
+    
+        @keyframes ball-beat {
+            50% {
+                opacity: .2;
+                -webkit-transform: scale(.75);
+                transform: scale(.75)
+            }
+            100% {
+                opacity: 1;
+                -webkit-transform: scale(1);
+                transform: scale(1)
+            }
+        }
+    
+        .ball-beat > div {
+            background-color: #0070ff;
+            width: .3rem;
+            height: .3rem;
+            border-radius: 100%;
+            margin: 2px;
+            display: inline-block;
+            -webkit-animation: ball-beat .9s 0s infinite linear;
+            animation: ball-beat .9s 0s infinite linear
+        }
+    
+        .ball-beat > div:nth-child(2) {
+            -webkit-animation-delay: -.3s !important;
+            animation-delay: -.3s !important
+        }
+        .ball-beat > div:nth-child(3) {
+            -webkit-animation-delay: -.6s !important;
+            animation-delay: -.6s !important
+        }
+    
+        /*缩放加载动画*/
+        @-webkit-keyframes ball-scale-multiple {
+            0% {
+                -webkit-transform: scale(0);
+                transform: scale(0);
+                opacity: 0
+            }
+            5% {
+                opacity: 1
+            }
+            100% {
+                -webkit-transform: scale(1);
+                transform: scale(1);
+                opacity: 0
+            }
+        }
+    
+        @keyframes ball-scale-multiple {
+            0% {
+                -webkit-transform: scale(0);
+                transform: scale(0);
+                opacity: 0
+            }
+            5% {
+                opacity: 1
+            }
+            100% {
+                -webkit-transform: scale(1);
+                transform: scale(1);
+                opacity: 0
+            }
+        }
+    
+        .ball-scale-multiple {
+            position: relative;
+            -webkit-transform: translateY(-30px);
+            -ms-transform: translateY(-30px);
+            transform: translateY(-30px)
+        }
+    
+        .ball-scale-multiple > div:nth-child(2) {
+            -webkit-animation-delay: -.4s;
+            animation-delay: -.4s
+        }
+    
+        .ball-scale-multiple > div:nth-child(3) {
+            -webkit-animation-delay: -.2s;
+            animation-delay: -.2s
+        }
+    
+        .ball-scale-multiple > div {
+            background-color: #0070ff;
+            border-radius: 100%;
+            position: absolute;
+            left: -30px;
+            top: 0;
+            opacity: 0;
+            margin: 0;
+            width: 60px;
+            height: 60px;
+            -webkit-animation: ball-scale-multiple 1s 0s linear infinite;
+            animation: ball-scale-multiple 1s 0s linear infinite
+        }
+        
+        /*小球撞击*/
+        .ball-stroke {font-size:0;vertical-align: middle;text-align: center;}
+        .ball-stroke div {display:inline-block;width: .5rem;height:.5rem;border-radius: 50%;background:#0070ff;}
+        .ball-start {-webkit-animation:ball-move-left 1.2s ease-out  infinite alternate;animation:ball-move-left 1.2s ease-out  infinite alternate;}
+        .ball-end {-webkit-animation:ball-move-right 1.2s 1.2s ease-out infinite alternate;animation:ball-move-right 1.2s 1.2s ease-out infinite alternate;}
+        @-webkit-keyframes ball-move-left {
+            0% {-webkit-transform:translate(0);transform:translate(0);}
+            60% {-webkit-transform:translate(0);transform:translate(0);}
+            90% {-webkit-transform:translate(-50px,-5px);transform:translate(-50px,-5px);}
+            100% {-webkit-transform:translate(-50px,-5px);transform:translate(-50px,-5px);}
+        }
+        @keyframes ball-move-left {
+            0% {-webkit-transform:translate(0);transform:translate(0);}
+            60% {-webkit-transform:translate(0);transform:translate(0);}
+            90% {-webkit-transform:translate(-50px,-5px);transform:translate(-50px,-5px);}
+            100% {-webkit-transform:translate(-50px,-5px);transform:translate(-50px,-5px);}
+        }
+        @-webkit-keyframes ball-move-right {
+            0% {-webkit-transform:translate(0);transform:translate(0);}
+            60% {-webkit-transform:translate(0);transform:translate(0);}
+            90% {-webkit-transform:translate(50px,-5px);transform:translate(50px,-5px);}
+            100% {-webkit-transform:translate(-50px,-5px);transform:translate(50px,-5px);}
+        }
+        @keyframes ball-move-right {
+            0% {-webkit-transform:translate(0);transform:translate(0);}
+            60% {-webkit-transform:translate(0);transform:translate(0);}
+            90% {-webkit-transform:translate(50px,-5px);transform:translate(50px,-5px);}
+            100% {-webkit-transform:translate(50px,-5px);transform:translate(50px,-5px);}
+        }
+        /*加载动画结束*/
+        
+    </style>
+</head>
+<body>
+<div id='app'>
+        <div id="jk-progress" style="position:fixed;left:0;right:0;top:0;bottom:0;z-index: 999;">
+        <div class="ball-beat" style="position:absolute;left:50%;top:38%;transform: translate(-50%,-50%)">
+            <div></div>
+            <div></div>
+            <div></div>
+            </div>
+        </div>
+</div>
+</body>
+<script>
+    // $ready=function () {
+    //
+    // }
+</script>
+</html>

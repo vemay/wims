@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>非配方产品领料界面</title>
+  <link rel="stylesheet" href="public/css/flexible.css">
+  <link rel="stylesheet" href="public/font/iconfont.css?v=1">
+  <link rel="stylesheet" href="public/css/public.css?v=a1c">
+  <link rel="stylesheet" href="public/components/jk-component.css?v=221">
+  <link rel="stylesheet" href="public/css/view-common-style.css?v=221">
+
+</head>
+<body>
+<div id='app'>
+  <jk-more-list
+    :more-list="moreList"
+    v-on:to-query="toQuery"
+    v-on:do-confirm="doConfirm"
+  ></jk-more-list>
+  
+  <div class="tb-container" ref="tbody" v-cloak>
+    <div class="tb-head table table-bordered" :style="{left:topLeft}" ref="tbHead">
+      <div class="tr">
+        <div class="text"
+             v-for="(field,index) in fieldsArr"
+             v-if="!(field.bHidden && field.bHidden-0===1)"
+        >
+          <div>{{field.sFieldCaption}}</div>
+        </div>
+      </div>
+    </div>
+    <div class="tb-body table table-bordered" ref="tbBody" v-cloak>
+      <div class="tr"
+           :class="{active:(data.bSystemSelected && data.bSystemSelected === 'true')}"
+           v-for="(data,index) in dirArr"
+           @click="selectData(index)">
+        <div  class="text" v-for="(field,index) in fieldsArr"
+              v-if="!(field.bHidden && field.bHidden-0===1)"
+        >
+          <span class="word-break-normal"  v-if="field.sDataType === 'WSDatetime'">{{data[field.sFieldNameEx] | dateTimeFormat}}</span>
+          <span  v-else-if="field.sDataType === 'WSBoolean'">
+                                        <i class="icon iconfont jk-true color-success"
+                                           v-if="data[field.sFieldNameEx] === true"></i>
+                                        <i class="icon iconfont jk-false color-danger"
+                                           v-if="data[field.sFieldNameEx] === false"></i>
+                                    </span>
+          <span  v-else >{{data[field.sFieldNameEx]}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="pull-text color-primary text-center" v-if="showPull" @click="doLoadMore" v-cloak>{{loadStr}}</p>
+  <jk-no-data :arr-source="dirArr"></jk-no-data>
+</div>
+</body>
+
+<script src="public/js/flexible.js"></script>
+<script src="core/rAndroid.js?v=fffd"></script>
+<script src="public/components/jk-component.js?v=1"></script>
+<script src="public/vm/commonViewVm.js?v=zzaa"></script>
+
+</html>

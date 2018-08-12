@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>存货明细看板</title>
+    <link rel="stylesheet" href="public/css/flexible.css">
+    <link rel="stylesheet" href="public/font/iconfont.css?v=1">
+    <link rel="stylesheet" href="public/css/public.css?v=a1">
+    <link rel="stylesheet" href="public/components/jk-component.css?v=221">
+
+    <style>
+      #app {position: relative;font-size:.4rem;}
+  
+      /*表格*/
+      .tb-container {padding: 1em 0; position: relative;overflow: auto;}
+      .tb-container .table {}
+      .tb-container .tb-head {border-top:1px solid #2C89FC;border-bottom:1px solid #2C89FC;position:fixed;left:0;top:0;background:#0070ff;color:#fff;z-index: 99;}
+      .tb-container .tb-head .text {color:#fff;}
+      .tb-container .tb-body {padding-top:4em;}
+      .tb-container .tr {display:flex;float:left;align-items:center;flex-wrap: nowrap;border-bottom:1px solid #ececec;color:#666;position: relative;}
+      .tb-container .tb-body-label {display: block;position: relative;}
+      .tb-container .tb-body-label input {position: absolute;left:0;top:0;opacity: 0;z-index: 10;}
+      .tb-container .tb-body-label input:checked+.tr {color:#0070ff;}
+      .tb-container .tr.active{color:#0070ff;}
+      .tb-container .tb-body .tb-body-label:nth-child(even) .tr {background:#fff;}
+  
+      .sub-container {display: flex;}
+      .table .text.sub-title {display: block;width:auto;padding-left:0;padding-right:0}
+      .table .text.sub-title .title {border-bottom:1px solid #ececec;padding:.16rem 0;}
+      .sub-text {display: flex;}
+  
+      .table .text {display: block;width: 1.8rem;word-break:break-all;padding:.16rem .24rem;font-size:.28rem;text-align: center;vertical-align: middle;}
+  
+      /*.table.tb-body .text {font-size:.28rem;}*/
+      /*表格 结束*/
+      .pull-text {font-size:.8em;padding:1em;}
+
+    </style>
+</head>
+<body>
+    <div id='app'>
+        <jk-more-list
+          :more-list="moreList"
+          v-on:to-query="toQuery"
+          v-on:do-confirm="doConfirm"
+        ></jk-more-list>
+
+        <div class="tb-container" ref="tbody" v-cloak>
+            <div class="tb-head table table-bordered" :style="{left:topLeft}" ref="tbHead">
+                <div class="tr">
+                    <div class="text" :class="{'sub-title':field.children}"
+                         v-for="(field,index) in fieldsArr"
+                    >
+                      <!--  @click="orderBy(field.sFieldNameEx,field.sDataType)"-->
+                        <div  v-if="!field.children" >{{field.sFieldCaption}}</div>
+                        <!--<div class="title"  v-if="bill.children" >{{bill.title}}</div>-->
+                        <!--<div class="sub-container">-->
+                            <!--<div class="text" v-for="value in bill.children">{{value}}</div>-->
+                        <!--</div>-->
+                    </div>
+                </div>
+            </div>
+            <div class="tb-body table table-bordered" ref="tbBody" v-cloak>
+              <label class="tb-body-label"  v-for="(data,index) in dirArr">
+                <input type="checkbox" v-model="selectedTr" :value="data">
+                <div class="tr">
+                  <!--:class="{text:!item.children,'sub-text':item.children}" -->
+                  <div  class="text" v-for="(field,index) in fieldsArr">
+                    <span  v-if="field.sDataType === 'WSDatetime'">{{data[field.sFieldNameEx] | dateTimeFormat}}</span>
+                    <span  v-else-if="field.sDataType === 'WSBoolean'">
+                                        <i class="icon iconfont jk-true color-success"
+                                           v-if="data[field.sFieldNameEx] === true"></i>
+                                        <i class="icon iconfont jk-false color-danger"
+                                           v-if="data[field.sFieldNameEx] === false"></i>
+                                    </span>
+                    <span  v-else>{{data[field.sFieldNameEx]}}</span>
+                  </div>
+                </div>
+              </label>
+            </div>
+        </div>
+       <p class="pull-text color-primary text-center" v-if="showPull" @click="doLoadMore" v-cloak>{{loadStr}}</p>
+        <jk-no-data :arr-source="dirArr"></jk-no-data>
+    </div>
+</body>
+
+<script src="public/js/flexible.js"></script>
+
+<script src="core/rAndroid.js?v=fffd"></script>
+<script src="public/components/jk-component.js?v=1"></script>
+<script src="public/vm/commonViewVm.js?v=112ad"></script>
+
+</html>

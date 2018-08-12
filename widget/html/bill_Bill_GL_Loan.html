@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>借款单</title>
+  <link rel="stylesheet" href="public/css/flexible.css">
+  <link rel="stylesheet" href="public/font/iconfont.css?v=12">
+  <link rel="stylesheet" href="public/css/public.css?v=acdccd">
+  <link rel="stylesheet" href="public/components/jk-component.css?v=1">
+  <style>
+    .bill-head-group-divide {
+      height: .5em;
+      background: #f5f7f6;
+    }
+  
+    .check-btn {
+      position: fixed;
+      z-index: 99;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin-bottom: 0;
+    }
+  
+    /*多表体tab*/
+    .table-title {
+      display: flex;
+    }
+  
+    .tab-tag {
+      padding: .3em 6%;
+      color: #fff;
+      text-shadow: 0 0 2px #0070ff;
+    }
+  
+    .tab-tag:first-child {
+    }
+  
+    /*.tab-tag.active {background:#3952F7;color:#fff;}*/
+    .tab-tag.active {
+      background: #0070ff;
+      color: #fff;
+    }
+  
+    /*.jk-bill-entry .info-item textarea {*/
+      /*width: 100%;*/
+      /*vertical-align: middle;*/
+    /*}*/
+
+  </style>
+</head>
+<body>
+<div id='app' class="public-bill" v-cloak>
+  <jk-more-list
+    :more-list="moreList"
+    v-on:do-new="doNew"
+    v-on:do-update="doUpdate"
+    v-on:do-give-up="doGiveUp"
+    v-on:do-save="doSave"
+    v-on:do-cancel="doCancel"
+    v-on:do-submit="doSubmit"
+    v-on:do-query="doQuery"
+    v-on:do-delete="doDelete"
+  ></jk-more-list>
+  <div class="content" v-cloak v-if="billHeadValues.cCode">
+    <div class="list-title-common" v-cloak>
+      <span class="left-text">单号: <span>{{billHeadValues.cCode}}</span></span>
+      <jk-head-page
+        class="right-btns"
+        :bof="billInfo.BOF"
+        :eof="billInfo.EOF"
+        v-on:bill-change="billChange">
+      </jk-head-page>
+    </div>
+    <div class="info-main">
+      <div class="item-group"><!-- v-if="billHeadFields"-->
+        <!--<div-->
+        <!--v-for="hf in billHeadFields"-->
+        <!--&gt;-->
+        <!--  v-if="(h.type-0 === 1) || (h.type-0 === 0)"-->
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="借款人"
+          :value="billHeadValues.cPerName"
+          v-on:input="billHeadValues.cPerName=$event"
+          :disabled="isDisabled('cPerName')"
+          v-on:blur="doReference('cPerName',billHeadValues.cPerName)"
+        ></jk-bill-entry>
+        <div class="bill-head-group-divide"></div>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="借款金额"
+          :value="billHeadValues.fLoanMoney"
+          v-on:input="billHeadValues.fLoanMoney=$event"
+          :disabled="isDisabled('fLoanMoney')"
+          v-on:blur="convertCurrency(billHeadValues.fLoanMoney,'cCapMoney','billHeadValues')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="大写金额"
+          :value="billHeadValues.cCapMoney"
+          v-on:input="billHeadValues.cCapMoney=$event"
+          disabled="1"
+        ></jk-bill-entry>
+        <div class="bill-head-group-divide"></div>
+        <jk-bill-entry
+          v-if="enumArr.cPayTypeArr && enumArr.cPayTypeArr.length>0"
+          entry-type="select"
+          tag="支付方式"
+          :value="billHeadValues.cPayType"
+          v-on:change="billHeadValues.cPayType=$event"
+          :select-arr="enumArr.cPayTypeArr"
+          :disabled="isDisabled('cPayType')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="支付银行名称"
+          :value="billHeadValues.cConBankName"
+          v-on:input="billHeadValues.cConBankName=$event"
+          :disabled="isDisabled('cConBankName')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="支付银行账号"
+          :value="billHeadValues.cAccountCode"
+          v-on:input="billHeadValues.cAccountCode=$event"
+          :disabled="isDisabled('cAccountCode')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="币种"
+          :value="billHeadValues.cCurrencyName"
+          v-on:input="billHeadValues.cCurrencyName=$event"
+          :disabled="isDisabled('cCurrencyName')"
+          v-on:blur="doReference('cCurrencyName',billHeadValues.cCurrencyName)"
+        ></jk-bill-entry>
+        <div class="bill-head-group-divide"></div>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="借款原因"
+          :value="billHeadValues.cLoanReason"
+          v-on:input="billHeadValues.cLoanReason=$event"
+          :disabled="isDisabled('cLoanReason')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="借款汇率"
+          :value="billHeadValues.fExchRate"
+          v-on:input="billHeadValues.fExchRate=$event"
+          :disabled="isDisabled('fExchRate')"
+        ></jk-bill-entry>
+        <div class="bill-head-group-divide"></div>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="date"
+          tag="约定还款日期"
+          :value="billHeadValues.dPlanBackDate"
+          v-on:set-data="billHeadValues.dPlanBackDate=$event"
+          :disabled="isDisabled('dPlanBackDate')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="date"
+          tag="最后还款日期"
+          :value="billHeadValues.dLastBackDate"
+          v-on:set-data="billHeadValues.dLastBackDate=$event"
+          disabled="1"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="累计还款金额"
+          :value="billHeadValues.fTotalBackMoney"
+          v-on:input="billHeadValues.fTotalBackMoney=$event"
+          disabled="1"
+        ></jk-bill-entry>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+<script src="public/js/flexible.js"></script>
+<script src="core/rAndroid.js?v=223"></script>
+<script src="public/components/jk-component.js?v=aaff22"></script>
+<script src="public/vm/commonBillVm.js?v=aaaa"></script>
+<script src="public/js/tools.js?v=zzaa"></script>
+</html>

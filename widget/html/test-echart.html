@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>存货明细看板</title>
+    <link rel="stylesheet" href="public/css/flexible.css">
+    <link rel="stylesheet" href="public/font/iconfont.css?v=12">
+    <!--<link rel="stylesheet" href="public/css/public.css?v=1">-->
+    <!--<link rel="stylesheet" href="public/css/animate.css?v=1">-->
+    <!--<link rel="stylesheet" href="public/components/jk-component.css?v=21">-->
+
+    <script src="public/js/flexible.js"></script>
+
+    <!--<script src="core/rAndroid.js?v=2"></script>-->
+    <script src="core/vue.js?v=13"></script>
+    <!--<script src="public/components/jk-component.js?v=333"></script>-->
+    <style>
+        #main {width: 100%;height:500px;}
+    </style>
+</head>
+<body>
+    <div id="main" ></div>
+</body>
+<script src="public/js/echarts.js?v=1"></script>
+<script>
+  var myChart = echarts.init(document.getElementById('main'));
+
+  // 指定图表的配置项和数据
+  var option = {
+    backgroundColor:'#fff',
+
+    textStyle: {
+      color: '#0070ff'
+    },
+    title: {
+      text: 'ECharts 入门示例'
+    },
+    dataZoom: [
+      {   // 这个dataZoom组件，默认控制x轴。
+        type: 'slider', // 这个 dataZoom 组件是 slider 型 dataZoom 组件
+        xAxisIndex:0,
+        start: 10,      // 左边在 10% 的位置。
+        end: 60         // 右边在 60% 的位置。
+      },
+      {   // 这个dataZoom组件，也控制x轴。
+        type: 'inside', // 这个 dataZoom 组件是 inside 型 dataZoom 组件
+        xAxisIndex:0,
+        start: 10,      // 左边在 10% 的位置。
+        end: 60         // 右边在 60% 的位置。
+      },
+      {   // 这个dataZoom组件，控制y轴。
+        type: 'inside', // 这个 dataZoom 组件是 inside 型 dataZoom 组件
+        yAxisIndex:0,
+        start: 0,
+        end: 80
+      }
+    ],
+    itemStyle:{
+      normal:{
+        // 阴影的大小
+        shadowBlur: 200,
+        // 阴影水平方向上的偏移
+        shadowOffsetX: 0,
+        // 阴影垂直方向上的偏移
+        shadowOffsetY: 2,
+        // 阴影颜色
+        shadowColor: 'rgba(0, 0, 0, 1)'}
+    },
+    smooth:true,
+    tooltip: {},
+    legend: {
+      data:['销量','品类']
+    },
+    xAxis: {
+      data: ["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子","衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
+    },
+    yAxis: {},
+    series: [{
+      name: '销量',
+      type: 'line',
+      data: [5, 20, 36, 10, 10, 20, 5, 20, 36, 10, 10, 20]
+    },
+      {
+        name: '品类',
+        type: 'line',
+        data: [3, 2, 6, 16, 8, 10, 3, 2, 6, 16, 8, 10]
+      }]
+  };
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+</script>
+</html>

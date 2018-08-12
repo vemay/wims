@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>请假条</title>
+  <link rel="stylesheet" href="public/css/flexible.css">
+  <link rel="stylesheet" href="public/font/iconfont.css?v=12">
+  <link rel="stylesheet" href="public/css/public.css?v=aa122">
+  <link rel="stylesheet" href="public/components/jk-component.css?v=zzcc">
+  <style>
+    .bill-head-group-divide {
+      height: .5em;
+      background: #f5f7f6;
+    }
+  
+    .check-btn {
+      position: fixed;
+      z-index: 99;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin-bottom: 0;
+    }
+  
+    /*多表体tab*/
+    .table-title {
+      display: flex;
+    }
+  
+    .tab-tag {
+      padding: .3em 6%;
+      color: #fff;
+      text-shadow: 0 0 2px #0070ff;
+    }
+  
+    .tab-tag:first-child {
+    }
+  
+    /*.tab-tag.active {background:#3952F7;color:#fff;}*/
+    .tab-tag.active {
+      background: #0070ff;
+      color: #fff;
+    }
+  
+    /*.jk-bill-entry .info-item textarea {*/
+      /*width: 100%;*/
+      /*vertical-align: middle;*/
+    /*}*/
+
+  </style>
+</head>
+<body>
+<div id='app' class="public-bill" v-cloak>
+  <jk-more-list
+    :more-list="moreList"
+    v-on:do-new="doNew"
+    v-on:do-update="doUpdate"
+    v-on:do-give-up="doGiveUp"
+    v-on:do-save="doSave"
+    v-on:do-cancel="doCancel"
+    v-on:do-submit="doSubmit"
+    v-on:do-query="doQuery"
+    v-on:do-delete="doDelete"
+  ></jk-more-list>
+  <div class="content" v-cloak v-if="billHeadValues.cCode">
+    <div class="list-title-common" v-cloak>
+      <span class="left-text">单号: <span>{{billHeadValues.cCode}}</span></span>
+      <jk-head-page
+        class="right-btns"
+        :bof="billInfo.BOF"
+        :eof="billInfo.EOF"
+        v-on:bill-change="billChange">
+      </jk-head-page>
+    </div>
+    <div class="info-main">
+      <div class="item-group"><!-- v-if="billHeadFields"-->
+        <!--<div-->
+        <!--v-for="hf in billHeadFields"-->
+        <!--&gt;-->
+        <!--  v-if="(h.type-0 === 1) || (h.type-0 === 0)"-->
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="人员名称"
+          :value="billHeadValues.cPerName"
+          v-on:input="billHeadValues.cPerName=$event"
+          :disabled="isDisabled('cPerName')"
+          v-on:blur="doReference('cPerName',billHeadValues.cPerName)"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="人员编码"
+          :value="billHeadValues.cPerCode"
+          v-on:input="billHeadValues.cPerCode=$event"
+          :disabled="isDisabled('cPerCode')"
+          v-on:blur="doReference('cPerCode',billHeadValues.cPerCode)"
+        ></jk-bill-entry>
+        <div class="bill-head-group-divide"></div>
+        <jk-bill-entry
+          v-if="enumArr.cLeaveTypeArr && enumArr.cLeaveTypeArr.length>0"
+          entry-type="select"
+          tag="请假类型"
+          :value="billHeadValues.cLeaveType"
+          v-on:change="billHeadValues.cLeaveType=$event"
+          op-value-attr="sEnumCode"
+          op-str-attr="sEnumValue"
+          :select-arr="enumArr.cLeaveTypeArr"
+          :disabled="isDisabled('cLeaveType')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="请假时长(小时)"
+          :value="billHeadValues.fLeaveHours"
+          v-on:input="billHeadValues.fLeaveHours=$event"
+          :disabled="isDisabled('fLeaveHours')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="date"
+          tag="请假开始时间"
+          :value="billHeadValues.dBDate"
+          v-on:set-data="billHeadValues.dBDate=$event"
+          :disabled="isDisabled('dBDate')"
+          v-on:blur="checkTwoDates(
+          billHeadValues.dBDate,
+          billHeadValues.dEDate,
+          {rootField:'billHeadValues',subField:'dBDate'},
+          getLeaveHours
+          )
+        "
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="date"
+          tag="请假结束时间"
+          :value="billHeadValues.dEDate"
+          v-on:set-data="billHeadValues.dEDate=$event"
+          :disabled="isDisabled('dEDate')"
+          v-on:blur="checkTwoDates(
+          billHeadValues.dBDate,
+          billHeadValues.dEDate,
+          {rootField:'billHeadValues',subField:'dEDate'},
+          getLeaveHours
+          )
+        "
+        ></jk-bill-entry>
+      
+        <!--v-on:blur="doBlurData('dEDate',billHeadValues.dEDate)"-->
+        <div class="bill-head-group-divide"></div>
+        <jk-bill-entry
+        v-if="billHeadValues"
+        tag="轮休时长(小时)"
+        :value="billHeadValues.fUseHolidaysHours"
+        v-on:input="billHeadValues.fUseHolidaysHours=$event"
+        :placeholder="billHeadValues.fUseHolidaysHours"
+        v-on:blur="doBlurData('fUseHolidaysHours',billHeadValues.fUseHolidaysHours)"
+        :disabled="isDisabled('fUseHolidaysHours')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="轮休票号"
+          :value="billHeadValues.cHolidayTicketsCode"
+          v-on:input="billHeadValues.cHolidayTicketsCode=$event"
+          :disabled="isDisabled('cHolidayTicketsCode')"
+        ></jk-bill-entry>
+        
+        <div class="bill-head-group-divide"></div>
+        
+        <jk-bill-entry
+          entry-type="textarea"
+          v-if="billHeadValues"
+          tag="请假事由"
+          :value="billHeadValues.cReason"
+          v-on:input="billHeadValues.cReason=$event"
+          :disabled="isDisabled('cReason')"
+        ></jk-bill-entry>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+<script src="public/js/flexible.js"></script>
+<script src="core/rAndroid.js?v=223"></script>
+<script src="public/components/jk-component.js?v=22ff"></script>
+<script src="public/vm/commonBillVm.js?v=zzbbaa"></script>
+</html>

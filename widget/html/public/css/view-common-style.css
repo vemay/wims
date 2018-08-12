@@ -1,0 +1,14 @@
+#app {position: relative;font-size:.4rem;}
+
+/*表格*/
+.tb-container {padding: 1em 0; position: relative;overflow: auto;}
+.tb-container .table {}
+.tb-container .tb-head {border-top:1px solid #2C89FC;border-bottom:1px solid #2C89FC;position:fixed;left:0;top:0;background:#0070ff;color:#fff;z-index: 99;}
+.tb-container .tb-head .text {color:#fff;}
+.tb-container .tb-body {padding-top:4em;}
+.tb-container .tr {display:flex;float:left;align-items:center;flex-wrap: nowrap;border-bottom:1px solid #ececec;color:#666;position: relative;}
+.tb-container .tb-body .tr.active{color:#0070ff;}
+.tb-container .tb-body .tr:nth-child(even) .tr {background:#fff;}
+.table .text {display: block;width: 1.8rem;word-break: break-all ;padding:.16rem .24rem;font-size:.28rem;text-align: center;vertical-align: middle;}
+/*表格 结束*/
+.pull-text {font-size:.8em;padding:1em;}

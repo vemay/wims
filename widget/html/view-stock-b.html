@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>存货明细看板</title>
+    <link rel="stylesheet" href="public/css/flexible.css">
+    <link rel="stylesheet" href="public/font/iconfont.css?v=1">
+    <link rel="stylesheet" href="public/css/public.css?v=1">
+    <link rel="stylesheet" href="public/components/jk-component.css?v=221">
+
+    <style>
+        .container {position: relative;}
+        .data-item {display:flex;align-items: center ;padding:.3em 5%;font-size:.4rem;border-bottom:1px solid #e5e5e5;}
+        .view-head {position: relative;}
+        .view-head .data-item {box-sizing:border-box;position:fixed;left:0;top:0;z-index:99;width:100%;
+            padding: .2rem 5%;border-color: #0070ff;background:#fff;}
+        /*.data-item:last-child{border:none;}*/
+        .data-list {padding-top:6em;}
+        .data-item .icon {margin-right:.5em;font-size:1.5em;}
+        .data-item .text {flex:1;padding:.1em .3em;font-size:.5em; text-align: center;}
+        .data-list .data-item:nth-child(even) {background:#fff;}
+        .data-list .data-item.active {color:#3EA53E;}
+    </style>
+</head>
+<body>
+    <div id='app'>
+        <jk-more-list :more-list="moreList" v-on:query="query" v-on:field="field"></jk-more-list>
+        <div class="container" v-cloak>
+            <div class="view-head">
+                <div class="data-item ">
+                    <p class="text click-effect"  v-for="(bill,index) in bills" @click="orderBy(bill.name)">{{bill.text}}</p>
+                </div>
+            </div>
+
+            <div class="data-list">
+                <jk-no-data :arr-source="datas" :img-style="imgStyle"></jk-no-data>
+                <div class="data-item " :class="{active:index === focusIndex}" v-for="(data,index) in datas" @click="rowFocus(index)">
+                    <p class="text">{{data.name}}</p>
+                    <p class="text">{{data.standard}}</p>
+                    <p class="text">{{data.group}}</p>
+                    <p class="text">{{data.store}}</p>
+                    <p class="text">{{data.position}}</p>
+                    <p class="text">{{data.change}}</p>
+                    <p class="text">{{data.stockNum}}</p>
+                    <p class="text">{{data.stockUseNum}}</p>
+                    <p class="text">{{data.balanceNum}}</p>
+                    <p class="text">{{data.borrowNum}}</p>
+                    <p class="text">{{data.checkNum}}</p>
+                    <p class="text">{{data.insteadNum}}</p>
+                    <p class="text">{{data.toPush}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script src="public/js/flexible.js"></script>
+
+<script src="core/rAndroid.js?v=fffd"></script>
+<script src="public/components/jk-component.js?v=1"></script>
+
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>存货明细看板</title>
+    <!--<link rel="stylesheet" href="public/mint-ui/mint-ui-rem.css?v=12">-->
+    <link rel="stylesheet" href="public/css/flexible.css">
+    <link rel="stylesheet" href="public/font/iconfont.css?v=1aa2">
+    <link rel="stylesheet" href="public/css/public.css?v=a22">
+    <link rel="stylesheet" href="public/css/animate.css?v=1">
+    <link rel="stylesheet" href="public/components/jk-component.css?v=aacc">
+    <link rel="stylesheet" href="public/mint-ui/mint-ui.css?v=21">
+    <script src="public/js/flexible.js"></script>
+    <script src="core/vue.js?v=13"></script>
+    <script src="core/rAndroid.js?v=2"></script>
+    <script src="public/lCalendar/lCalendar.js?v=2ad"></script>
+    <script src="public/components/jk-component.js?v=zzaabb"></script>
+    <script src="public/mint-ui/mint-ui.js"></script>
+    <style>
+        #app {font-size: .32rem;height:100%;}
+        /*.list {height:8rem;padding:.5em;overflow-y:auto;background:#f00;}*/
+        /*.sub {font-size:.5rem;width: 100%;height:auto; padding:.5em;}*/
+        /*.text {font-size:.5rem;padding:2em;}*/
+        /*.con {width: 3rem;height:1rem;  border:1px solid #3EA53E;display: inline-block;background:#3990FF;white-space: normal;}*/
+        /*.fade-enter {transform: translateX(100%);}*/
+        /*.fade-enter-active {transition:transform .3s ease-in;}*/
+        /*.fade-leave-active {transition:transform .3s ease-out;}*/
+        /*.fade-leave-to {transform:translateX(100%)}*/
+        /*.custom-textarea {}*/
+        /*.swipe-item {font-size:1rem;color:#0070ff;}*/
+        /*.scroll-dom {height:100px;background:#D8E8FC;overflow-y: auto;}*/
+        /*.scroll-dom p {font-size:1rem;}*/
+        .ball-stroke {font-size:0;vertical-align: middle;text-align: center;}
+        .ball-stroke div {display:inline-block;width: .5rem;height:.5rem;border-radius: 50%;background:#666;}
+        .ball-start {animation:ball-move-left 4s infinite;}
+        @keyframes ball-move-left {
+            0% {transform:translate(0);}
+            25% {transform:translate(-50px,-5px);}
+            50% {transform:translate(-50px,-5px);}
+            75% {transform:translate(0);}
+            100% {transform:translate(0);}
+        }
+        .ball-stroke div.ball-end {background:#3EA53E;}
+        .jk-input-select {position: relative;}
+        .jk-input-select .input-select-input {width: 100%;border-bottom:1px solid #999;}
+        .jk-input-select .input-select-list {position:absolute;left:0;bottom:0;width: 100%;z-index: 99;}
+    </style>
+</head>
+<body>
+
+    <div id='app' v-cloak>
+    
+        <button class="jk-submit" @click="doTest"  ref="sdom" style="width:100px;height:40px;">测试</button>
+       
+        <div class="jk-input-select">
+            <input class="input-select-input" type="text" placeholder="输入文字">
+            <div class="input-select-list">
+                <div class="text-list">
+                    <span class="text">第一个</span>
+                    <i class="icon iconfont jk-clear"></i>
+                </div>
+                <div class="text-list">
+                    <span class="text">第一个</span>
+                    <i class="icon iconfont jk-clear"></i>
+                </div>
+                <div class="text-list">
+                    <span class="text">第一个</span>
+                    <i class="icon iconfont jk-clear"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+<script>
+  $ready = function () {
+   
+    new Vue({
+      el:'#app',
+      data:{
+        n:5,
+        autoFill:false,
+        condition1:true,
+        condition2:false,
+        show:false,
+        pickerValue:'2018-05-01 16:30:00',
+        testStr:'0001',
+        da:'',
+        value:'33|22',
+        allLoaded:false,
+        selectArr:[
+          {name:'11',v:1,},
+          {name:'22',v:2},
+          {name:'33',v:3},
+          {name:'44',v:4},
+          {name:'55',v:5},
+          {name:'66',v:6}
+          ],
+        textList:[
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+        ],
+  
+        textListS:[
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+          {text:'这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，这里写点字，多写点，'},
+        ],
+        options:[],
+        selectVal:2,
+        textArr:{text:'select'},
+        
+      },
+      computed:{
+        handleRight:function () {
+          return [
+            {
+              content: 'Delete',
+              style: { background: 'red', color: '#fff' },
+              handler: function () {
+                dialogAlert('删除操作')
+              }
+            }
+          ]
+        },
+      },
+      watch:{
+        n:{
+          handler:function() {
+            var t = this;
+            this.textList = this.textListS.filter(function (value,index) {
+              return index <= t.n;
+            })
+          },
+          immediate:true
+        }
+      },
+      methods:{
+        
+        loadTop:function () {
+        // 加载更多数据
+          this.$refs.loadmore.onTopLoaded();
+        },
+        loadBottom:function () {
+        // 加载更多数据
+          this.n += 5;
+        //   this.allLoaded = true;// 若数据已全部获取完毕
+          this.$refs.loadmore.onBottomLoaded();
+        },
+        doTest:function () {
+          this.da = !this.da;
+        },
+        initPush:function () {
+          var t = this;
+          var ajpush = api.require('ajpush');
+          ajpush.init(function(ret) {
+            if (ret && ret.status){
+              //success
+              ajpush.getRegistrationId(function(ret) {
+                var registrationId = ret.id;
+                alertMy(registrationId)
+              })
+            }
+          });
+        },
+        bindPush:function () {
+          var ajpush = api.require('ajpush');
+          var param = {alias:'myalias',tags:['tag1','tag2']};
+          ajpush.bindAliasAndTags(param,function(ret) {
+            var statusCode = ret.statusCode;
+          });
+        },
+        openPicker:function() {
+          this.$refs.picker.open();
+        }
+      },
+      mounted:function () {
+        // frameSetbounces();
+        var t = this;
+        api.startLocation({
+          accuracy: '100m',
+          filter: 1,
+          autoStop: true
+        }, function(ret, err){
+          if(ret && ret.status){
+            //获取位置信息成功
+          }else{
+            alert(JSON.stringify(err));
+          }
+        });
+        // this.da = '2018-04-04T18:24:00+08:00';
+        // var calendar = new lCalendar();
+        // calendar.init({
+        //   'frameBounds':true,
+        //   'trigger': '#demo1',
+        //   'type': 'datetime',
+        //   'callBack':function (ret) {
+        //     myConsole(ret)
+        //   }
+        // });
+      }
+    })
+  }
+
+</script>
+</html>

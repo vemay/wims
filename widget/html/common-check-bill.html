@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>销售订单</title>
+    <link rel="stylesheet" href="public/css/flexible.css">
+    <link rel="stylesheet" href="public/font/iconfont.css?v=12">
+    <link rel="stylesheet" href="public/css/public.css?v=a1">
+    <link rel="stylesheet" href="public/components/jk-component.css?v=1fd">
+  
+  <!--<link rel="stylesheet" href="public/css/animate.css?v=21">-->
+    <style>
+        .bill-head-group-divide {height:.5em;background: #f5f7f6;}
+        .check-btn {position: fixed;z-index: 99;bottom:0;left:0;right:0;margin-bottom:0;}
+        .bill-list {position:relative;}
+        /*多表体tab*/
+        .table-title {display:flex;}
+        .tab-tag {padding:.3em 6%;color:#fff;text-shadow: 0 0 2px #0070ff;}
+        .tab-tag:first-child {}
+        /*.tab-tag.active {background:#3952F7;color:#fff;}*/
+        .tab-tag.active {background:#0070ff;color:#fff;}
+
+        .next-page-enter{transform: translateX(100%);}
+        .next-page-enter-active {transition:.3s;}
+        .next-page-enter-to {transform: translateX(0);}
+        .next-page-leave{opacity: 0;}
+
+        .prev-page-enter{transform: translateX(-100%);}
+        .prev-page-enter-active {transition:.3s;}
+        .prev-page-enter-to {transform: translateX(0);}
+        .prev-page-leave{opacity: 0;}
+    </style>
+</head>
+<body>
+<div id='app' class="public-bill" v-cloak>
+    <jk-more-list
+            :more-list="moreList"
+            v-on:do-check="doCheck"
+    ></jk-more-list>
+    <div class="content" v-cloak>
+        <div class="list-title-common" v-cloak>
+            <span class="left-text">单号: <span>{{billCode}}</span></span>
+            <!--<span class="right-btns" v-show="curd">-->
+                <!--<span class="page-btn  click-effect">首</span>-->
+                <!--<span class="page-btn  click-effect">上</span>-->
+                <!--<span class="page-btn  click-effect">下</span>-->
+                <!--<span class="page-btn  click-effect">尾</span>-->
+            <!--</span>-->
+        </div>
+        <div class="info-main">
+            <div class="item-group"  v-if="billHeadFields">
+                <div
+                        v-for="hf in billHeadFields"
+                >
+
+                   
+                    <jk-bill-entry
+                            v-if="hf.sDataType==='WSDatetime'"
+                            entry-type="date"
+                            :tag="hf.sFieldCaption"
+                            :value="billHeadValues[hf.sFieldNameEx]"
+                            v-on:set-data="billHeadValues[hf.sFieldNameEx]=$event"
+                            :disabled="1"
+                    ></jk-bill-entry>
+                    <jk-bill-entry
+                      v-else-if="hf.sDataType==='WSEnum'"
+                      entry-type="textarea"
+                      :tag="hf.sFieldCaption"
+                      :value="billHeadValues[hf.sFieldNameEx]"
+                      v-on:set-data="billHeadValues[hf.sFieldNameEx]=$event"
+                      :disabled="1"
+                      placeholder=""
+                    ></jk-bill-entry>
+                    <jk-bill-entry
+                            v-else-if="hf.sDataType==='WSBoolean'"
+                            entry-type="checkbox"
+                            :tag="hf.sFieldCaption"
+                            :value="billHeadValues[hf.sFieldNameEx]"
+                            v-on:change="billHeadValues[hf.sFieldNameEx]=$event"
+                            :disabled="1"
+                            placeholder=""
+                    ></jk-bill-entry>
+                    <jk-bill-entry
+                      v-else
+                      entry-type="textarea"
+                      :tag="hf.sFieldCaption"
+                      :value="billHeadValues[hf.sFieldNameEx]"
+                      v-on:input="billHeadValues[hf.sFieldNameEx]=$event"
+                      :disabled="1"
+                      placeholder=""
+                    ></jk-bill-entry>
+                </div>
+            </div>
+            <div class="work-table-tab table-title linear-bg-blue-70"
+                v-if="billBodyGroup.length"
+            >
+                    <span class="tab-tag"
+                          :class="{'active':currentTab - index == 0}"
+                          v-for="(tab,index) in bodyGroupTab"
+                          @click="changeBody(tab,index)"
+                          v-cloak
+                    >{{tab.text}}</span>
+            </div>
+            <div class="sale-list" v-if="billBodyValues">
+                <!--<jk-no-data :arr-source="billBodyValues"></jk-no-data>-->
+                <div class="bill-list"  v-if="billBodyValues.length">
+                    <div
+                            v-for="(item,index) in billBodyValues"
+                    >
+                        <transition name="next-page" v-if="gt">
+
+                            <div class="item-group"  v-if="index===currentPageIndex">
+                                <div v-for="(bf,i) in billBodyFields">
+                                    <div v-if="item[bf.sFieldNameEx]!==undefined">
+                                        <!--<div class="bill-head-group-divide"-->
+                                             <!--v-if="b.type-0 === -1"-->
+                                        <!--&gt;</div>-->
+                                        <!--      v-if="bf.type-0 === 1"-->
+                                       
+                                        <jk-bill-entry
+                                                v-if="bf.sDataType==='WSDatetime'"
+                                                entry-type="date"
+                                                :tag="bf.sFieldCaption"
+                                                :value="item[bf.sFieldNameEx]"
+                                                v-on:set-data="item[bf.sFieldNameEx]=$event"
+                                                :disabled="1"
+                                                placeholder=""
+                                        ></jk-bill-entry>
+                                        <jk-bill-entry
+                                          v-else-if="bf.sDataType==='WSEnum'"
+                                          entry-type="textarea"
+                                          :tag="bf.sFieldCaption"
+                                          :value="item[bf.sFieldNameEx]"
+                                          v-on:set-data="item[bf.sFieldNameEx]=$event"
+                                          :disabled="1"
+                                          placeholder=""
+                                        ></jk-bill-entry>
+                                        <jk-bill-entry
+                                                v-else-if="bf.sDataType==='WSBoolean'"
+                                                entry-type="checkbox"
+                                                :tag="bf.sFieldCaption"
+                                                :value="item[bf.sFieldNameEx]"
+                                                v-on:change="item[bf.sFieldNameEx]=$event"
+                                                :disabled="1"
+                                                placeholder=""
+                                        ></jk-bill-entry>
+                           
+                                        <jk-bill-entry
+                                          v-else
+                                          entry-type="textarea"
+                                          :tag="bf.sFieldCaption"
+                                          :value="item[bf.sFieldNameEx]"
+                                          v-on:input="item[bf.sFieldNameEx]=$event"
+                                          :disabled="1"
+                                          placeholder=""
+                                        ></jk-bill-entry>
+                                    </div>
+                                </div>
+                            </div>
+                        </transition>
+
+                        <transition name="prev-page"  v-if="!gt">
+                            <div class="item-group"  v-if="index===currentPageIndex">
+                                <div v-for="(bf,i) in billBodyFields">
+                                    <div v-if="item[bf.sFieldNameEx]!==undefined">
+                                      <jk-bill-entry
+                                        v-if="bf.sDataType==='WSDatetime'"
+                                        entry-type="date"
+                                        :tag="bf.sFieldCaption"
+                                        :value="item[bf.sFieldNameEx]"
+                                        v-on:set-data="item[bf.sFieldNameEx]=$event"
+                                        :disabled="1"
+                                        placeholder=""
+                                      ></jk-bill-entry>
+                                        <jk-bill-entry
+                                          v-else-if="bf.sDataType==='WSEnum'"
+                                          entry-type="textarea"
+                                          :tag="bf.sFieldCaption"
+                                          :value="item[bf.sFieldNameEx]"
+                                          v-on:set-data="item[bf.sFieldNameEx]=$event"
+                                          :disabled="1"
+                                          placeholder=""
+                                        ></jk-bill-entry>
+                                      <jk-bill-entry
+                                        v-else-if="bf.sDataType==='WSBoolean'"
+                                        entry-type="checkbox"
+                                        :tag="bf.sFieldCaption"
+                                        :value="item[bf.sFieldNameEx]"
+                                        v-on:change="item[bf.sFieldNameEx]=$event"
+                                        :disabled="1"
+                                        placeholder=""
+                                      ></jk-bill-entry>
+                                      <jk-bill-entry
+                                        v-else
+                                        entry-type="textarea"
+                                        :tag="bf.sFieldCaption"
+                                        :value="item[bf.sFieldNameEx]"
+                                        v-on:input="item[bf.sFieldNameEx]=$event"
+                                        :disabled="1"
+                                        placeholder=""
+                                      ></jk-bill-entry>
+                                    </div>
+                                </div>
+                            </div>
+                        </transition>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <jk-item-pages
+        v-if="type!=='check'"
+        :list="billBodyValues"
+        :current-page-index="currentPageIndex"
+        :show-page-btns="isEdit"
+        v-on:handle-page="handlePage"
+    ></jk-item-pages>
+    <!--<div class="jk-submit no-radius check-btn"-->
+         <!--@click="changeTo('check-bill')"-->
+    <!--&gt;立即审核</div>-->
+</div>
+</body>
+<script src="public/js/flexible.js"></script>
+<script src="core/rAndroid.js?v=222"></script>
+<script src="public/components/jk-component.js?v=aaaaadfff22"></script>
+</html>

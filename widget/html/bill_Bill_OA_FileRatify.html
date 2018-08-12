@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>文件签批单</title>
+  <link rel="stylesheet" href="public/css/flexible.css">
+  <link rel="stylesheet" href="public/font/iconfont.css?v=12">
+  <link rel="stylesheet" href="public/css/public.css?v=azzaa">
+  <link rel="stylesheet" href="public/components/jk-component.css?v=zzaa">
+  <style>
+    .bill-head-group-divide {
+      height: .5em;
+      background: #f5f7f6;
+    }
+    
+    .check-btn {
+      position: fixed;
+      z-index: 99;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin-bottom: 0;
+    }
+    
+    /*多表体tab*/
+    .table-title {
+      display: flex;
+    }
+    
+    .tab-tag {
+      padding: .3em 6%;
+      color: #fff;
+      text-shadow: 0 0 2px #0070ff;
+    }
+    
+    .tab-tag:first-child {
+    }
+    
+    /*.tab-tag.active {background:#3952F7;color:#fff;}*/
+    .tab-tag.active {
+      background: #0070ff;
+      color: #fff;
+    }
+    
+    /*.jk-bill-entry .info-item textarea {*/
+    /*width: 100%;*/
+    /*vertical-align: middle;*/
+    /*}*/
+  
+  </style>
+</head>
+<body>
+<div id='app' class="public-bill" v-cloak>
+  <jk-more-list
+    :more-list="moreList"
+    v-on:do-new="doNew"
+    v-on:do-update="doUpdate"
+    v-on:do-give-up="doGiveUp"
+    v-on:do-save="doSave"
+    v-on:do-cancel="doCancel"
+    v-on:do-submit="doSubmit"
+    v-on:do-query="doQuery"
+    v-on:do-delete="doDelete"
+  ></jk-more-list>
+  <div class="content" v-cloak v-if="billHeadValues.cCode">
+    <div class="list-title-common" v-cloak>
+      <span class="left-text">单号: <span>{{billHeadValues.cCode}}</span></span>
+      <jk-head-page
+        class="right-btns"
+        :bof="billInfo.BOF"
+        :eof="billInfo.EOF"
+        v-on:bill-change="billChange">
+      </jk-head-page>
+    </div>
+    <div class="info-main">
+      <div class="item-group"><!-- v-if="billHeadFields"-->
+        <!--<div-->
+        <!--v-for="hf in billHeadFields"-->
+        <!--&gt;-->
+        <!--  v-if="(h.type-0 === 1) || (h.type-0 === 0)"-->
+        <jk-bill-entry
+          v-if="enumArr.cFileTypeArr && enumArr.cFileTypeArr.length>0"
+          entry-type="select"
+          tag="文件类别"
+          :value="billHeadValues.cFileType"
+          v-on:change="billHeadValues.cFileType=$event"
+          :select-arr="enumArr.cFileTypeArr"
+          :disabled="isDisabled('cFileType')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="文件编码"
+          :value="billHeadValues.cFileCode"
+          v-on:input="billHeadValues.cFileCode=$event"
+          :disabled="isDisabled('cFileCode')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="文件标题"
+          :value="billHeadValues.cFileName"
+          v-on:input="billHeadValues.cFileName=$event"
+          :disabled="isDisabled('cFileName')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="enumArr.cFileGradeArr && enumArr.cFileGradeArr.length>0"
+          entry-type="select"
+          tag="保密等级"
+          :value="billHeadValues.cFileGrade"
+          v-on:change="billHeadValues.cFileGrade=$event"
+          :select-arr="enumArr.cFileGradeArr"
+          :disabled="isDisabled('cFileGrade')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="enumArr.cFileIssueArr && enumArr.cFileIssueArr.length>0"
+          entry-type="mcheck"
+          tag="发放形式"
+          :value="billHeadValues.cFileIssue"
+          :m-check-arr="enumArr.cFileIssueArr"
+          v-on:change="billHeadValues.cFileIssue=$event"
+          :disabled="isDisabled('cFileIssue')"
+        ></jk-bill-entry>
+        
+        <div class="bill-head-group-divide"></div>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="发文单位"
+          :value="billHeadValues.cDepName"
+          v-on:input="billHeadValues.cDepName=$event"
+          :disabled="isDisabled('cDepName')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="文件摘要"
+          :value="billHeadValues.cFileSummary"
+          v-on:input="billHeadValues.cFileSummary=$event"
+          :disabled="isDisabled('cFileSummary')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="enumArr.cFileLevelArr && enumArr.cFileLevelArr.length>0"
+          entry-type="select"
+          tag="文件级别"
+          :value="billHeadValues.cFileLevel"
+          v-on:change="billHeadValues.cFileLevel=$event"
+          :select-arr="enumArr.cFileLevelArr"
+          :disabled="isDisabled('cFileLevel')"
+        ></jk-bill-entry>
+        <div class="bill-head-group-divide"></div>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="签发人"
+          :value="billHeadValues.cPerName_QF"
+          v-on:input="billHeadValues.cPerName_QF=$event"
+          :disabled="isDisabled('cPerName_QF')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="校对人"
+          :value="billHeadValues.cPerName_JD"
+          v-on:input="billHeadValues.cPerName_JD=$event"
+          :disabled="isDisabled('cPerName_JD')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="撰稿人"
+          :value="billHeadValues.cPerName_ZG"
+          v-on:input="billHeadValues.cPerName_ZG=$event"
+          :disabled="isDisabled('cPerName_ZG')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="date"
+          tag="生效日期"
+          :value="billHeadValues.dEndVerifyDate"
+          v-on:set-data="billHeadValues.dEndVerifyDate=$event"
+          :disabled="isDisabled('dEndVerifyDate')"
+        ></jk-bill-entry>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+<script src="public/js/flexible.js"></script>
+<script src="core/rAndroid.js?v=223"></script>
+<script src="public/components/jk-component.js?v=zz"></script>
+<script src="public/vm/commonBillVm.js?v=zzaa"></script>
+</html>

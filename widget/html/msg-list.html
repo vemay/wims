@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="public/css/flexible.css">
+    <link rel="stylesheet" href="public/font/iconfont.css?v=1">
+    <link rel="stylesheet" href="public/css/public.css?v=1">
+    <link rel="stylesheet" href="public/components/jk-component.css?v=1">
+
+    <style>
+        .app {height:100%;position: relative;font-size:.36rem;}
+        .list-container {padding: .5em 5%;}
+        /*.bill-list {padding:.4rem 5%;}*/
+        /*.bill-item {display:flex;align-items:center;padding:.6em 0;font-size:.4rem;border-top:1px solid #e5e5e5;}*/
+        /*.bill-item:first-child{border:none;}*/
+        /*.bill-item .icon {margin-right:.5em;font-size:1.5em;}*/
+
+        .bill-list {margin: .5em 0; /*padding:.5em 3%;*/}
+        .bill-item-box {display:block;position:relative;border-top:1px solid #f5f7f6;}
+        .bill-item-box:first-child{border:none;}
+
+        .bill-item-box input {position:absolute;left:0;top:0;z-index:9;opacity: 0;}
+        .bill-item {margin-bottom:.1em;padding:.8em .5em;border-radius:.3em;background:#fff;}
+        .bill-item-box input:checked+.bill-item {background:#D1F0FA;}
+        .bill-item.active {background:#D1F0FA;}
+        .bill-item .icon {margin-right:.5em;font-size:1.5em;}
+        .item-title {display:flex;font-size:1em;line-height: 2em;}
+        .item-title .title-left {flex:1;}
+        .item-sectitle {font-size:.9em;line-height:1.8em;color:#666;}
+        .item-sectitle .tag {padding-right:1em;}
+        .item-custom {font-size:1em;color:#3EA53E;}
+
+        .bill-item .sub-title {display: flex;align-items: center;}
+        .sub-title .sub-title-box {flex:1;}
+        .sub-title .view-detail {color:#fff;background:#0070ff;font-size:0.8em;width: 2em;height:2em;padding:.5em;border-radius:.3em;line-height:2em;text-align: center;}
+    </style>
+</head>
+<body>
+    <div id='app' class="app">
+        <jk-more-list
+                :more-list="moreList"
+                v-on:del="del"
+        ></jk-more-list>
+        <div class="list-container" v-cloak>
+            <div class="bill-list" >
+                <jk-no-data :arr-source="dirArr" msg="暂无消息"></jk-no-data>
+                <!--<label class="bill-item-box" v-for="(dir,index) in dirArr">-->
+                    <!--<input type="checkbox" v-model="dirCheckedArr" :value="dir">-->
+                    <div class="bill-item"
+                         :class="{active:(dir.bSystemSelected && dir.bSystemSelected === 'true')}"
+                         v-for="(dir,index) in dirArr"
+                         @click="selectData(index)"
+                         v-cloak>
+                        <div class="text item-title">
+                            <div class="title-left  color-primary">{{dir.cBillCaption}}</div>
+                            <div class="title-right color-success text-right">{{dir.cSendPerName}}</div>
+                        </div>
+                        <div class="sub-title">
+                            <div class="sub-title-box ">
+                                <p class="text item-sectitle"><span class="tag">单据编号：</span>{{dir.cBillCode}}</p>
+                                <p class="text item-sectitle"><span class="tag">发送时间：</span>{{dir.dSendDate | dateTimeFormat}}</p>
+                                <p class="text item-sectitle"><span class="tag">消息内容：</span>{{dir.cInvCode}}</p>
+
+                            </div>
+                            <!--<div class="view-detail click-effect" @click.prevent="viewDetail(dir)">-->
+                            <!--查看-->
+                            <!--</div>-->
+                        </div>
+                    </div>
+                <!--</label>-->
+            </div>
+        </div>
+
+        <!--<div class="bill-list">
+            <div class="bill-item click-effect" v-for="bill in bills" @click="changeTo('file-view')">
+                <p><i class="icon iconfont" :class="bill.icon" :style="{color:bill.color}"></i></p>
+                <p class="text">{{bill.text}}</p>
+            </div>
+        </div>-->
+    </div>
+</body>
+<script src="public/js/flexible.js"></script>
+<script src="core/rAndroid.js?v=fffd"></script>
+<script src="public/components/jk-component.js"></script>
+</html>

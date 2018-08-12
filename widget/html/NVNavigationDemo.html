@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="public/css/flexible.css">
+    <link rel="stylesheet" href="public/css/public.css">
+    <script src="public/js/flexible.js"></script>
+
+    <script src="core/rAndroid.js?v=ff"></script>
+    <style>
+        .card {font-size:0.6rem;color:#403b61;font-style: normal;}
+        label,span,input {font-size:0.3rem;}
+        input {color:rgb(2, 87, 58);height:2em;}
+    </style>
+</head>
+<body>
+    <div id='app'>
+        <header style='height:2rem;background:#6600ff;color:#352828;'>测试颜色</header>
+        <div class="card">冀凯股份选项卡首页</div>
+        <div class="card" @click="changeTo('modal_tab')">测试模式入口页一</div>
+    </div>
+</body>
+
+<script>
+$ready = function () {
+new Vue({
+     el:'#app',
+     data:{
+         msg:''
+     },
+     mounted:function() {
+         var NVNavigationBar = api.require('NVNavigationBar');
+            NVNavigationBar.open({
+            rect: {
+                x: 0,
+                y: 600,
+                w: api.frameWidth,
+                h: 42
+            },
+        styles: {
+                orientation: 'horizontal',
+                bg: '#6b6b6b',
+                bgAlpha: 1,
+                font: {
+                size: 14,
+                sizeSelected: 18,
+                color: '#FFFFFF',
+                colorSelected: '#ff0000',
+                alpha: 1
+                },
+                itemSize: {
+                    w: 90,
+                    h: 44
+                }
+        },
+            items: [{
+            title: '标题一',
+            bg: '#FFE7BA',
+            bgSelected: '#ff00000'
+            },{
+            title: '标题二',
+            bg: '#FFE1FF',
+            bgSelected: '#FFA500'
+            },{
+            title: '标题三',
+            bg: '#FFAEB9',
+            bgSelected: '#FFA500'
+            },{
+            title: '标题四',
+            bg: '#CDCD00',
+            bgSelected: '#FFA500'
+            },{
+            title: '标题五',
+            bg: '#BBFFFF',
+            bgSelected: '#FFA500'
+            },{
+            title: '标题六',
+            bg: '#436EEE',
+            bgSelected: '#FFA500'
+            }],
+            selectedIndex: 1,
+            fixedOn: api.frameName,
+            id: 'first'
+        }, function(ret, err) {
+            api.alert({msg:JSON.stringify(ret)});
+        });
+        
+     },
+     methods:{
+      
+     }
+ })
+}
+ 
+</script>
+
+</html>

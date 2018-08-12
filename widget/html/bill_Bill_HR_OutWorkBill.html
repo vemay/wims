@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>因公出差任务单</title>
+  <link rel="stylesheet" href="public/css/flexible.css">
+  <link rel="stylesheet" href="public/font/iconfont.css?v=12">
+  <link rel="stylesheet" href="public/css/public.css?v=adfafadf">
+  <link rel="stylesheet" href="public/components/jk-component.css?v=aff">
+  <style>
+    .bill-head-group-divide {
+      height: .5em;
+      background: #f5f7f6;
+    }
+    .check-btn {
+      position: fixed;
+      z-index: 99;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin-bottom: 0;
+    }
+    /*多表体tab*/
+    .table-title {
+      display: flex;
+    }
+    .tab-tag {
+      padding: .3em 6%;
+      color: #fff;
+      text-shadow: 0 0 2px #0070ff;
+    }
+    .tab-tag:first-child {
+    }
+    .tab-tag.active {
+      background: #0070ff;
+      color: #fff;
+    }
+
+  </style>
+</head>
+<body>
+<div id='app' class="public-bill" v-cloak>
+  <jk-more-list
+    :more-list="moreList"
+    v-on:do-new="doNew"
+    v-on:do-update="doUpdate"
+    v-on:do-give-up="doGiveUp"
+    v-on:do-save="doSave"
+    v-on:do-cancel="doCancel"
+    v-on:do-submit="doSubmit"
+    v-on:do-query="doQuery"
+    v-on:do-delete="doDelete"
+  ></jk-more-list>
+  <div class="content" v-cloak v-if="billHeadValues.cCode">
+    <div class="list-title-common" v-cloak>
+      <span class="left-text">单号: <span>{{billHeadValues.cCode}}</span></span>
+      <jk-head-page
+        class="right-btns"
+        :bof="billInfo.BOF"
+        :eof="billInfo.EOF"
+        v-on:bill-change="billChange">
+      </jk-head-page>
+    </div>
+    <div class="info-main">
+      <div class="item-group"><!-- v-if="billHeadFields"-->
+        <!--<div-->
+        <!--v-for="hf in billHeadFields"-->
+        <!--&gt;-->
+        <!--  v-if="(h.type-0 === 1) || (h.type-0 === 0)"-->
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="出差任务部门"
+          :value="billHeadValues.cDepName"
+          v-on:input="billHeadValues.cDepName=$event"
+          :disabled="isDisabled('cDepName')"
+          v-on:blur="doReference('cDepName',billHeadValues.cDepName)"
+
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="checkbox"
+          check-type="radio"
+          tag="国内"
+          :value="billHeadValues.bAtHome"
+          v-on:change="doRadio('bAtHome',['bAtAbroad','bAtHome'],'billHeadValues')"
+          :disabled="isDisabled('bAtHome')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="checkbox"
+          check-type="radio"
+          tag="国外"
+          :value="billHeadValues.bAtAbroad"
+          v-on:change="doRadio('bAtAbroad',['bAtAbroad','bAtHome'],'billHeadValues')"
+          :disabled="isDisabled('bAtAbroad')"
+        ></jk-bill-entry>
+        <div class="bill-head-group-divide"></div>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="任务下达人"
+          :value="billHeadValues.cPerName_XD"
+          v-on:input="billHeadValues.cPerName_XD=$event"
+          :disabled="isDisabled('cPerName_XD')"
+          v-on:blur="doReference('cPerName_XD',billHeadValues.cPerName_XD)"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="enumArr.cCostBearingArr && enumArr.cCostBearingArr.length>0"
+          entry-type="select"
+          tag="费用承担"
+          :value="billHeadValues.cCostBearing"
+          v-on:change="billHeadValues.cCostBearing=$event"
+          :select-arr="enumArr.cCostBearingArr"
+          :disabled="isDisabled('cCostBearing')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="费用承担单位编码"
+          :value="billHeadValues.cCostBearingUnitCode"
+          v-on:input="billHeadValues.cCostBearingUnitCode=$event"
+          :disabled="isDisabled('cCostBearingUnitCode')"
+          v-on:blur="doReference('cCostBearingUnitCode',billHeadValues.cCostBearingUnitCode,null,
+          {sReferRule:sReferRule[billHeadValues.cCostBearing]})"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="费用承担单位名称"
+          :value="billHeadValues.cCostBearingUnitName"
+          v-on:input="billHeadValues.cCostBearingUnitName=$event"
+          :disabled="isDisabled('cCostBearingUnitName')"
+          v-on:blur="doReference('cCostBearingUnitName',billHeadValues.cCostBearingUnitName,null,
+          {sReferRule:sReferRule[billHeadValues.cCostBearing]})"
+
+        ></jk-bill-entry>
+        <div class="bill-head-group-divide"></div>
+  
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="date"
+          tag="计划外出开始时间"
+          :value="billHeadValues.dStartDate"
+          v-on:set-data="billHeadValues.dStartDate=$event"
+          :disabled="isDisabled('dStartDate')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="date"
+          tag="计划外出结束时间"
+          :value="billHeadValues.dEndDate"
+          v-on:set-data="billHeadValues.dEndDate=$event"
+          :disabled="isDisabled('dEndDate')"
+          v-on:blur="checkTwoDates(
+          billHeadValues.dStartDate,
+          billHeadValues.dEndDate,
+          {rootField:'billHeadValues',subField:'dEndDate'})"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="date"
+          tag="实际外出结束日期"
+          :value="billHeadValues.dRealEndDate"
+          v-on:set-data="billHeadValues.dRealEndDate=$event"
+          :disabled="isDisabled('dRealEndDate')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="因公出差人"
+          :value="billHeadValues.cPerName1"
+          v-on:input="billHeadValues.cPerName1=$event"
+          :disabled="isDisabled('cPerName1')"
+          v-on:blur="doReference('cPerName1',billHeadValues.cPerName1)"
+
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="因公出差人"
+          :value="billHeadValues.cPerName2"
+          v-on:input="billHeadValues.cPerName2=$event"
+          :disabled="isDisabled('cPerName2')"
+          v-on:blur="doReference('cPerName2',billHeadValues.cPerName2)"
+
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="因公出差人"
+          :value="billHeadValues.cPerName3"
+          v-on:input="billHeadValues.cPerName3=$event"
+          :disabled="isDisabled('cPerName3')"
+          v-on:blur="doReference('cPerName3',billHeadValues.cPerName3)"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="因公出差人"
+          :value="billHeadValues.cPerName4"
+          v-on:input="billHeadValues.cPerName4=$event"
+          :disabled="isDisabled('cPerName4')"
+          v-on:blur="doReference('cPerName4',billHeadValues.cPerName4)"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="因公出差人"
+          :value="billHeadValues.cPerName5"
+          v-on:input="billHeadValues.cPerName5=$event"
+          :disabled="isDisabled('cPerName5')"
+          v-on:blur="doReference('cPerName5',billHeadValues.cPerName5)"
+
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="因公出差人"
+          :value="billHeadValues.cPerName6"
+          v-on:input="billHeadValues.cPerName6=$event"
+          :disabled="isDisabled('cPerName6')"
+          v-on:blur="doReference('cPerName6',billHeadValues.cPerName6)"
+
+        ></jk-bill-entry>
+        <div class="bill-head-group-divide"></div>
+  
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="任务内容"
+          :value="billHeadValues.cTask"
+          v-on:input="billHeadValues.cTask=$event"
+          :disabled="isDisabled('cTask')"
+        ></jk-bill-entry>
+        <div class="bill-head-group-divide"></div>
+  
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="出差总结"
+          :value="billHeadValues.cResult"
+          v-on:input="billHeadValues.cResult=$event"
+          :disabled="isDisabled('cResult')"
+        ></jk-bill-entry>
+        <div class="bill-head-group-divide"></div>
+  
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="评价意见"
+          :value="billHeadValues.cAssess"
+          v-on:input="billHeadValues.cAssess=$event"
+          :disabled="isDisabled('cAssess')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="评价人"
+          :value="billHeadValues.cAssessPer"
+          v-on:input="billHeadValues.cAssessPer=$event"
+          :disabled="isDisabled('cAssessPer')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="date"
+          tag="评价时间"
+          :value="billHeadValues.dAssessTime"
+          v-on:set-data="billHeadValues.dAssessTime=$event"
+          :disabled="isDisabled('dAssessTime')"
+        ></jk-bill-entry>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+<script src="public/js/flexible.js"></script>
+<script src="core/rAndroid.js?v=223"></script>
+<script src="public/components/jk-component.js?v=zzaacc"></script>
+<script src="public/vm/commonBillVm.js?v=zzbb"></script>
+<script src="public/js/tools.js?v=bbaa"></script>
+<script src="public/js/settingData.js?v=bbaa"></script>
+</html>

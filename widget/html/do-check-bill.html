@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>审批单据</title>
+    <link rel="stylesheet" href="public/css/flexible.css">
+    <link rel="stylesheet" href="public/font/iconfont.css?v=1">
+    <link rel="stylesheet" href="public/css/public.css?v=a1d2">
+
+    <script src="public/js/flexible.js"></script>
+
+    <script src="core/rAndroid.js?v=fffd"></script>
+    <style>
+        .app {padding: .8rem 0;}
+        .bill-list {padding:.4rem 3%;}
+        .bill-item {margin-bottom:.6em;padding:.6em 3%;display:flex;align-items:center;font-size:.34rem;border-radius:.3em;background:#fff;}
+        .bill-item:first-child{border:none;}
+        .bill-item .text {flex:1;}
+        .bill-item .name {margin-right:.5em;line-height: 2em;}
+        .bill-item .ret {text-align: right;}
+        .bill-item .date {padding-top:.5em;color:#a1a1a1;font-size:.9em;}
+
+
+        .bill-check {padding:1em 5%;}
+        .check-select {display: flex;margin: 2em 0;}
+        .check-item {flex:1;margin: 0 1em;}
+
+        /*单选组件*/
+        .input-radio-component { display: block; position: relative;font-size:.32rem;}
+        .input-radio-component input {opacity: 0;z-index: 99;position: absolute;left:0;top:0;}
+        .input-radio-component .text {display: block;border: 1px solid #81a9c3; color:#333;text-align: center;padding:.5em .8em;border-radius:.3em;}
+        .input-radio-component input:checked+.text {color:#fff;}
+        .input-radio-component input:checked+.text.check-success {background: #3EA53E;border-color:#3EA53E;}
+        .input-radio-component input:checked+.text.check-failed {background: #F02924;border-color:#F02924;}
+        .check-reason {padding:1em 0 ;border-top:1px solid #e5e5e5;}
+        .check-reason textarea {box-sizing: border-box;width: 100%;padding:.5em;color:#333;font-size:.34rem;line-height:1.5em;border-radius:.3em;}
+        .check-title {font-size:.4rem;line-height:2em;color:#0070FF;}
+        .reason-text {background:#fff;border:none;}
+        .reason-text:focus {background:#fff;border:none;}
+    </style>
+</head>
+<body>
+    <div id='app' class="app">
+        <div class="list-title-common">审批</div>
+
+
+        <div class="bill-list">
+            <div class="bill-item click-effect" v-for="log in logs">
+                <div class="text" v-cloak>
+                    <p class="name">{{log['@cWaitingVerifiers']}}</p>
+                    <p class="date" v-if="log['@dDate']">{{log['@dDate']}}</p>
+                    <p class="date" v-else>{{log['@dEndDate']}}</p>
+                    <p class="date" v-if="log['@cVerifyIdea']">{{log['@cVerifyIdea']}}</p>
+                </div>
+                
+                <!--
+                    UnPass
+                    End
+                    RejectContinue
+                    Wait
+                    Pass
+                -->
+                <p class="ret color-danger"  v-if="log['@cstate']==='UnPass'" v-cloak>不通过</p>
+                <p class="ret color-warning" v-else-if="log['@cstate']==='RejectContinue'" v-cloak>会签拒绝</p>
+                <p class="ret color-success" v-else-if="log['@cstate']==='Pass' || log['@cstate']==='End'" v-cloak>通过</p>
+                <p class="ret color-primary" v-else="log['@cstate']==='Wait'" v-cloak>待审</p>
+            </div>
+            <div class="check-reason">
+                <textarea class="reason-text" v-model="verifyIdea" name="" id="" cols="30" rows="2" placeholder="审批意见"></textarea>
+            </div>
+        </div>
+
+        <div class="bill-check">
+            <div class="check-select" v-cloak>
+                <div class="check-item">
+                    <div class="jk-submit bg-danger no-border" @click="refuse">不同意</div>
+                </div>
+                <div class="check-item">
+                    <div class="jk-submit bg-success no-border" @click="agree">同意</div>
+                </div>
+            </div>
+
+            <!--<div class="jk-submit" @click="checkSubmit">提交</div>-->
+        </div>
+    </div>
+</body>
+
+</html>

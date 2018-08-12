@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>销售订单</title>
+    <link rel="stylesheet" href="public/css/flexible.css">
+    <link rel="stylesheet" href="public/font/iconfont.css?v=12">
+    <link rel="stylesheet" href="public/css/public.css?v=a21">
+    <link rel="stylesheet" href="public/components/jk-component.css?v=21">
+    <link rel="stylesheet" href="public/css/animate.css?v=21">
+    <style>
+      .icon {padding:0 1em;}
+      .bill-head-group-divide {height:.5em;background: #f5f7f6;}
+      .dir-submit {margin:0;border-radius: 0;position: fixed;bottom:0;left:0;}
+      .clear-btn {padding:1em 0 ;}
+      .config-item {display: flex;padding:.8em 5%;border-bottom: 1px solid #f5f7f6;}
+      .config-item .text {flex:1;}
+      .config-item .item-handle {text-align: right;}
+      .current-item {border-bottom:1px solid #aaaaaa;}
+      
+      .jk-submit.save-api {display:inline-block;font-size:.36rem;}
+      .history {margin-top:2em;align-items: center;}
+
+      .check-select {display: flex;font-size:.32rem;}
+      .check-item {flex:1;margin: 0 0;}
+      .check-item .jk-submit {font-size:.32rem;}
+      .check-item:first-child .jk-submit {border-radius:.3em 0 0 .3em; }
+      .check-item:last-child .jk-submit {border-radius:0 .3em .3em 0; }
+    </style>
+</head>
+<body>
+<div id="app" class="public-bill">
+  <div class="current-item" v-show="showNew" v-cloak>
+    <div class="list-title-common" v-cloak>
+      <span class="left-text">配置项</span>
+    </div>
+    <div class="info-main">
+      <div class="item-group">
+        <jk-bill-entry
+          tag="ip地址"
+          :value="apiIp"
+          v-on:input="apiIp=$event"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          tag="端口"
+          :value="apiPort"
+          v-on:input="apiPort=$event"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          tag="标签"
+          placeholder="选填"
+          :value="apiText"
+          v-on:input="apiText=$event"
+        ></jk-bill-entry>
+      </div>
+    </div>
+    <div class="check-select" v-cloak>
+      <div class="check-item">
+        <div class="jk-submit jk-btn-empty no-margin" @click="doCancel">取消</div>
+      </div>
+      <div class="check-item">
+        <div class="jk-submit no-margin" @click="doSave">保存</div>
+      </div>
+    </div>
+  </div>
+  <div class="list-title-common history" v-cloak>
+    <span class="left-text">我的配置项</span>
+    <!--<i class="color-primary icon iconfont jk-dengji" @click="edit=true"></i>-->
+    <i class="color-primary icon iconfont jk-add click-effect" @click="clickAdd"></i>
+  </div>
+  <div class="info-main" v-cloak>
+    <div class="item-group">
+      <div class="config-item "
+           :class="{'color-primary':apiIndex-0 === index}"
+           v-for="(api,index) in apiList"
+           @click="selectApi(index)"
+      >
+        <div class="text">{{api.api_text}}</div>
+        <div class="item-handle" v-show="apiIndex-0 === index">
+          <i class="icon iconfont jk-dengji click-effect" @click.stop="editApi(index)"></i>
+          <i class="icon iconfont jk-del color-danger click-effect" @click.stop="delApi(index)"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!--<div class="clear-btn text-center color-gray-light" @click="clearEnum">清除枚举缓存</div>-->
+    <div class="jk-submit dir-submit" @click="doSubmit">确认</div><!--selectRet(ret)-->
+</div>
+</body>
+<script src="public/js/flexible.js"></script>
+<script src="core/rAndroid.js?v=ffffd3"></script>
+<script src="public/components/jk-component.js?v=1"></script>
+<script src="public/lCalendar/lCalendar.js?v=1"></script>
+</html>

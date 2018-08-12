@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="public/css/flexible.css">
+    <link rel="stylesheet" href="public/font/iconfont.css?v=1">
+    <link rel="stylesheet" href="public/css/public.css?v=1">
+
+    <script src="public/js/flexible.js"></script>
+
+    <script src="core/rAndroid.js?v=fffd"></script>
+    <style>
+        #app {padding-top: .8rem;}
+        .bill-list {padding:.6rem 5%;}
+        .bill-item {display:flex;align-items:center;padding:.6em 0;font-size:.4rem;border-top:1px solid #e5e5e5;}
+        .bill-item:first-child{border:none;}
+        .bill-item .icon {margin-right:.5em;font-size:1.5em;}
+    </style>
+</head>
+<body>
+    <div id='app'>
+        <div class="list-title-common" v-cloak>{{title}}</div>
+        <div class="bill-list" v-cloak>
+            <div class="bill-item click-effect" v-for="(task,index) in taskList" @click="handleTask(task,index)">
+                <p><i class="icon iconfont" :class="task.icon" :style="{color:task.color}"></i></p>
+                <p class="text">{{task.text}}</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>差旅费报销单</title>
+  <link rel="stylesheet" href="public/css/flexible.css">
+  <link rel="stylesheet" href="public/font/iconfont.css?v=12">
+  <link rel="stylesheet" href="public/css/public.css?v=acdccd">
+  <link rel="stylesheet" href="public/components/jk-component.css?v=1">
+  <style>
+    .bill-head-group-divide {
+      height: .5em;
+      background: #f5f7f6;
+    }
+  
+    .check-btn {
+      position: fixed;
+      z-index: 99;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin-bottom: 0;
+    }
+  
+    /*多表体tab*/
+    .table-title {
+      display: flex;
+    }
+  
+    .tab-tag {
+      padding: .3em 6%;
+      color: #fff;
+      text-shadow: 0 0 2px #0070ff;
+    }
+  
+    .tab-tag:first-child {
+    }
+  
+    /*.tab-tag.active {background:#3952F7;color:#fff;}*/
+    .tab-tag.active {
+      background: #0070ff;
+      color: #fff;
+    }
+  
+    /*.jk-bill-entry .info-item textarea {*/
+      /*width: 100%;*/
+      /*vertical-align: middle;*/
+    /*}*/
+
+  </style>
+</head>
+<body>
+<div id='app' class="public-bill" v-cloak>
+  <jk-more-list
+    :more-list="moreList"
+    v-on:do-new="doNew"
+    v-on:do-update="doUpdate"
+    v-on:do-give-up="doGiveUp"
+    v-on:do-save="doSave"
+    v-on:do-cancel="doCancel"
+    v-on:do-submit="doSubmit"
+    v-on:do-query="doQuery"
+    v-on:do-delete="doDelete"
+  ></jk-more-list>
+  <div class="content" v-cloak v-if="billHeadValues.cCode">
+    <div class="list-title-common" v-cloak>
+      <span class="left-text">单号: <span>{{billHeadValues.cCode}}</span></span>
+      <jk-head-page
+        class="right-btns"
+        :bof="billInfo.BOF"
+        :eof="billInfo.EOF"
+        v-on:bill-change="billChange">
+      </jk-head-page>
+    </div>
+    <div class="info-main">
+      <div class="item-group"><!-- v-if="billHeadFields"-->
+        <!--<div-->
+        <!--v-for="hf in billHeadFields"-->
+        <!--&gt;-->
+        <!--  v-if="(h.type-0 === 1) || (h.type-0 === 0)"-->
+        <jk-bill-entry
+          v-if="enumArr.cUnitTypeArr && enumArr.cUnitTypeArr.length>0"
+          entry-type="select"
+          tag="费用承担单位"
+          :value="billHeadValues.cUnitType"
+          v-on:change="billHeadValues.cUnitType=$event"
+          :select-arr="enumArr.cUnitTypeArr"
+          :disabled="isDisabled('cUnitType')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="费用承担单位编码"
+          :value="billHeadValues.cDepCode"
+          v-on:input="billHeadValues.cDepCode=$event"
+          :disabled="isDisabled('cDepCode')"
+          v-on:blur="doReference('cDepCode',billHeadValues.cDepCode)"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="费用承担单位名称"
+          :value="billHeadValues.cDepName"
+          v-on:input="billHeadValues.cDepName=$event"
+          :disabled="isDisabled('cCusName')"
+          v-on:blur="doReference('cCusName',billHeadValues.cDepName)"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="开户银行"
+          :value="billHeadValues.cConBankName"
+          v-on:input="billHeadValues.cConBankName=$event"
+          :disabled="isDisabled('cConBankName')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="银行账号"
+          :value="billHeadValues.cAccountCode"
+          v-on:input="billHeadValues.cAccountCode=$event"
+          :disabled="isDisabled('cAccountCode')"
+          v-on:blur="doReference('cCusName',billHeadValues.cAccountCode)"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="收款单位银行名称"
+          :value="billHeadValues.cAccountName_SK"
+          v-on:input="billHeadValues.cAccountName_SK=$event"
+          :disabled="isDisabled('cAccountName_SK')"
+          ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="收款单位银行账号"
+          :value="billHeadValues.cAccountCode_SK"
+          v-on:input="billHeadValues.cAccountCode_SK=$event"
+          :disabled="isDisabled('cAccountCode_SK')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="checkbox"
+          tag="是否自动核销借款"
+          :value="billHeadValues.bHXLoan"
+          v-on:change="billHeadValues.bHXLoan=$event"
+          :disabled="isDisabled('bHXLoan')"
+        ></jk-bill-entry>
+           <!--表体-->
+        <div class="work-table-tab table-title linear-bg-blue-70"
+             v-if="billBodyGroup.length"
+        >
+                    <span class="tab-tag"
+                          :class="{'active':currentTab - index == 0}"
+                          v-for="(tab,index) in bodyGroupTab"
+                          @click="changeBody(tab,index)"
+                          v-cloak
+                    >{{tab.text}}</span>
+        </div>
+        <div class="sale-list" v-if="billBodyValues">
+          <div
+            v-for="(item,index) in billBodyValues"
+          >
+            <div class="item-group" v-if="index===currentPageIndex && item.sEditFlag!=='D'">
+              <!--todo表体参照-->
+              <jk-bill-entry
+                v-if="item"
+                entry-type="textarea"
+                tag="出差人"
+                :value="item.cPerName"
+                v-on:input="item.cPerName=$event"
+                :disabled="isDisabled('cPerName')"
+                v-on:blur="doReference('cPerName',item.cPerName,1)"
+              ></jk-bill-entry>
+              <jk-bill-entry
+                v-if="item"
+                entry-type="date"
+                tag="起点|时间"
+                :value="item.dBeginDate"
+                v-on:set-data="item.dBeginDate=$event"
+                :disabled="isDisabled('dBeginDate')"
+              ></jk-bill-entry>
+              <jk-bill-entry
+                v-if="item"
+                entry-type="textarea"
+                tag="起点|地点"
+                :value="item.cBeginAddr"
+                v-on:input="item.cBeginAddr=$event"
+                :disabled="isDisabled('cBeginAddr')"
+              ></jk-bill-entry>
+              <jk-bill-entry
+                v-if="item"
+                entry-type="date"
+                tag="终点|时间"
+                :value="item.dEndDate"
+                v-on:set-data="item.dEndDate=$event"
+                :disabled="isDisabled('dEndDate')"
+              ></jk-bill-entry>
+              <jk-bill-entry
+                v-if="item"
+                entry-type="textarea"
+                tag="终点|地点"
+                :value="item.cEndAddr"
+                v-on:input="item.cEndAddr=$event"
+                :disabled="isDisabled('cEndAddr')"
+              ></jk-bill-entry>
+              <jk-bill-entry
+                v-if="enumArr.cTransToolsArr && enumArr.cTransToolsArr.length>0"
+                entry-type="select"
+                tag="交通工具"
+                :value="billHeadValues.cTransTools"
+                v-on:change="billHeadValues.cTransTools=$event"
+                :select-arr="enumArr.cTransToolsArr"
+                :disabled="isDisabled('cTransTools')"
+              ></jk-bill-entry>
+              <jk-bill-entry
+                v-if="item"
+                tag="单据张数"
+                :value="item.iDocCount"
+                v-on:input="item.iDocCount=$event"
+                :disabled="isDisabled('iDocCount')"
+              ></jk-bill-entry>
+              <jk-bill-entry
+                v-if="item"
+                tag="在勤天数"
+                :value="item.iZQDays"
+                v-on:input="item.iZQDays=$event"
+                :disabled="isDisabled('iZQDays')"
+              ></jk-bill-entry>
+              <jk-bill-entry
+                v-if="item"
+                tag="补贴标准"
+                :value="item.fBTStand"
+                v-on:input="item.fBTStand=$event"
+                :disabled="isDisabled('fBTStand')"
+              ></jk-bill-entry>
+              <jk-bill-entry
+                v-if="item"
+                tag="在勤补贴"
+                :value="item.fBTMoney"
+                v-on:input="item.fBTMoney=$event"
+                :disabled="isDisabled('fBTMoney')"
+              ></jk-bill-entry>
+              <jk-bill-entry
+                v-if="item"
+                tag="交通费"
+                :value="item.fJTFee"
+                v-on:input="item.fJTFee=$event"
+                :disabled="isDisabled('fJTFee')"
+              ></jk-bill-entry>
+              <jk-bill-entry
+                v-if="item"
+                tag="路桥费"
+                :value="item.fLQFee"
+                v-on:input="item.fLQFee=$event"
+                :disabled="isDisabled('fLQFee')"
+              ></jk-bill-entry>
+              <jk-bill-entry
+                v-if="item"
+                tag="住宿费"
+                :value="item.fZSFee"
+                v-on:input="item.fZSFee=$event"
+                :disabled="isDisabled('fZSFee')"
+              ></jk-bill-entry>
+              <jk-bill-entry
+                v-if="item"
+                tag="通迅费"
+                :value="item.fTXFee"
+                v-on:input="item.fTXFee=$event"
+                :disabled="isDisabled('fTXFee')"
+              ></jk-bill-entry>
+              <jk-bill-entry
+                v-if="item"
+                tag="其他费用"
+                :value="item.fOtherFee"
+                v-on:input="item.fOtherFee=$event"
+                :disabled="isDisabled('fOtherFee')"
+              ></jk-bill-entry>
+              <jk-bill-entry
+                v-if="item"
+                tag="其中:进项税"
+                :value="item.fTax"
+                v-on:input="item.fTax=$event"
+                :disabled="isDisabled('fTax')"
+              ></jk-bill-entry>
+              <jk-bill-entry
+                entry-type="textarea"
+                v-if="item"
+                tag="合计"
+                :value="item.fSumMoney"
+                v-on:input="item.fSumMoney=$event"
+                :disabled="isDisabled('fSumMoney')"
+              ></jk-bill-entry>
+              <jk-bill-entry
+                v-if="item"
+                tag="超标金额"
+                :value="item.fOverMoney"
+                v-on:input="item.fOverMoney=$event"
+                :disabled="isDisabled('fOverMoney')"
+              ></jk-bill-entry>
+              <jk-bill-entry
+                v-if="item"
+                tag="超标扣罚"
+                :value="item.fOVerKFMoney"
+                v-on:input="item.fOVerKFMoney=$event"
+                :disabled="isDisabled('fOVerKFMoney')"
+              ></jk-bill-entry>
+              <jk-bill-entry
+                v-if="item"
+                tag="延期报销扣罚"
+                :value="item.fYQKFMoney"
+                v-on:input="item.fYQKFMoney=$event"
+                :disabled="isDisabled('fYQKFMoney')"
+              ></jk-bill-entry>
+              <jk-bill-entry
+                v-if="item"
+                tag="核销金额"
+                :value="item.fHXMoney"
+                v-on:input="item.fHXMoney=$event"
+                :disabled="isDisabled('fHXMoney')"
+              ></jk-bill-entry>
+              <jk-bill-entry
+                v-if="item"
+                tag="银行支付"
+                :value="item.fBankMoney"
+                v-on:input="item.fBankMoney=$event"
+                :disabled="isDisabled('fBankMoney')"
+              ></jk-bill-entry>
+              <jk-bill-entry
+                v-if="item"
+                tag="现金支付"
+                :value="item.fCashMoney"
+                v-on:input="item.fCashMoney=$event"
+                :disabled="isDisabled('fCashMoney')"
+              ></jk-bill-entry>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <jk-item-pages
+    :list="billBodyValues"
+    :current-page-index="currentPageIndex"
+    :show-page-btns="showPageEditBtns"
+    v-on:add-bill-item="addBillItem"
+    v-on:del-bill-item="delBillItem"
+    v-on:handle-page="handlePage"
+  ></jk-item-pages>
+</div>
+</body>
+<script src="public/js/flexible.js"></script>
+<script src="core/rAndroid.js?v=223"></script>
+<script src="public/components/jk-component.js?v=c66"></script>
+<script src="public/vm/commonBillVm.js?v=aazccs"></script>
+</html>

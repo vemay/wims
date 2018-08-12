@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="public/css/flexible.css">
+    <link rel="stylesheet" href="public/font/iconfont.css?v=132">
+    <link rel="stylesheet" href="public/css/public.css?v=a11">
+    <link rel="stylesheet" href="public/components/jk-component.css?v=31">
+    <link rel="stylesheet" href="public/css/animate.css?v=1">
+
+    <style>
+        .app {height:100%;box-sizing:border-box;font-size:.4rem;position:relative;padding-bottom:1rem;}
+        .dir-filter {position: fixed;left:0;top:0;right:0;background:#f5f7f6;padding-bottom:1em;z-index: 99;}
+        .search-head {background:#fff;margin-bottom:.5em;padding:.5em 3%;color:#a1a1a1;text-align:center;}
+        .filter-fields {background:#fff;padding:0 3%;}
+        .search-head .text {font-size:.9em;padding-left:.5em;}
+        .app .animated {-webkit-animation-duration: .3s;animation-duration: .3s;}
+        .container {box-sizing: border-box; padding:2.5rem 5% 0;}
+        .list-title-common {margin: .5em 0;font-size:inherit;}
+
+        /*.bill-list { margin-bottom:1em;padding:.5em 3%;background:#fff;}*/
+
+        .bill-item-box {display:block;position:relative;margin-bottom:3px;border-radius:.3em;background:#fff;}
+        .bill-item-box:first-child{border:none;}
+
+        .bill-item-box input {position:absolute;left:0;top:0;z-index:9;opacity: 0;}
+        .bill-item { padding:.6em .3em;border-radius:.3em;}
+        .bill-item-box input:checked+.bill-item {background:#D1F0FA;}
+        .bill-item .icon {margin-right:.5em;}
+        .item-title {display: flex;align-items: center;line-height: 1.8em;font-size:.9em;}
+        .item-title .text {flex:1;}
+        .item-sectitle {font-size:.8em;line-height:1.5em;color:#999;}
+        .item-custom {font-size:.8em;color:#3EA53E;}
+
+        .bill-item .sub-title {display: flex;align-items: center;}
+        .sub-title .sub-title-box {flex:1;}
+        .sub-title .view-detail {color:#fff;font-size:0.8em;width: 2em;height:2em;padding:.5em;border-radius:.3em;line-height:2em;text-align: center;}
+
+        .pull-text {font-size:.8em;padding:1em;}
+    </style>
+</head>
+<body>
+    <div id='app' class="app" v-cloak>
+        <!--<jk-more-list :more-list="moreList" v-on:set-query="setQuery"></jk-more-list>-->
+        <div class="dir-filter">
+            <div class="search-head click-effect" @click="openQueryFrame"><i class="icon iconfont jk-search"></i><span class="text">点击筛选</span></div>
+            <div class="filter-fields">
+                <jk-custom-fields :fields-arr="fieldsArr" attr="sFieldCaption" v-on:do-checked="fieldChecked" v-if="fieldsArr.length"></jk-custom-fields>
+            </div>
+        </div>
+        <div class="container" >
+           
+                <div class="bill-list" >
+                  <jk-no-data :arr-source="dirArr"></jk-no-data>
+                  <jk-load-more :auto-fill="false" :top-method="loadTop" :bottom-method="loadBottom" :bottom-all-loaded="allLoaded" ref="loadmore">
+                    <label class="bill-item-box" v-for="dir in dirArr">
+                        <!--<input type="checkbox" v-model="dirCheckedArr" :value="dir">-->
+                        <div class="bill-item  ">
+                            <p class="text item-title color-primary" v-if="dir[titleField]">
+                                <span class="text">{{dir[titleField]}}</span>
+                                <span class="view-detail click-effect color-success" @click.prevent="viewDetail(dir)">
+                                <i class="icon iconfont">详情</i><i class="icon iconfont jk-arrow-right"></i>
+                            </span>
+                            </p>
+                            <div class="sub-title">
+                                <div class="sub-title-box">
+                                    <p class="text item-sectitle"
+                                       v-for="(custom,index) in fieldsChecked"
+                                       v-if="fieldsChecked.length"
+                                    >
+                                        <span>{{custom.sFieldCaption}}：</span>
+                                        <span  v-if="custom.sDataType === 'WSDatetime'">{{dir[custom.sFieldNameEx] | dateTimeFormat}}</span>
+                                        <span  v-else-if="custom.sDataType === 'WSBoolean'">
+                                        <i class="icon iconfont jk-true color-success"
+                                           v-if="dir[custom.sFieldNameEx] === true"></i>
+                                        <i class="icon iconfont jk-false color-danger"
+                                           v-if="dir[custom.sFieldNameEx] === false"></i>
+                                    </span>
+                                        <span  v-else>{{dir[custom.sFieldNameEx]}}</span>
+                                    </p>
+                                </div>
+                
+                            </div>
+                        </div>
+                    </label>
+                  </jk-load-more>
+  
+                  <!--<p class="pull-text color-primary text-center" v-if="showPull" @click="doLoadMore">加载更多</p>-->
+                </div>
+
+        </div>
+    </div>
+</body>
+<script src="public/js/flexible.js"></script>
+
+<script src="core/rAndroid.js?v=fffd"></script>
+<script src="public/components/jk-component.js?v=2"></script>
+</html>

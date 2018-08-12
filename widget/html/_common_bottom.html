@@ -1,0 +1,285 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=yes">
+    <meta name="format-detection" content="telephone=NO">
+    <meta name="apple-touch-fullscreen" content="YES"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+    <meta name="HandheldFriendly" content="True">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="core/css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="public/css/flexible.css"/>
+    <link rel="stylesheet" type="text/css" href="public/css/public.css"/>
+    
+    <style>
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
+        #wrap {
+            height: 100%;
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-box-orient: vertical;
+            -webkit-flex-flow: column;
+            flex-flow: column;
+        }
+
+        #main {
+            -webkit-box-flex: 1;
+            -webkit-flex: 1;
+            flex: 1;
+        }
+
+        .bottom-bar {
+            display: flex;
+            position:fixed;
+            left:0;
+            bottom:0;
+            z-index: 99;
+            width: 100%;
+            background:#6600ff;
+            font-size:26px;
+            border-bottom:#e1e1e1 solid 1px;
+            height: 60px;
+            line-height: 60px;
+            text-align: center;
+            color:#FFFFFF;
+        }
+        .bottom-bar .bottom-bar-item {
+            color:#fff;
+            flex:1;
+        }
+        .bottom-bar .bottom-bar-item:active {
+            color:#ccc;
+        }
+        .bottom-bar .bottom-bar-item.item-active {
+            background:blueviolet;
+        }
+        
+    </style>
+</head>
+<body>
+<div id="wrap" v-cloak>
+    <div id="footer" class="bottom-bar" id="backbtn" >
+        <div class="bottom-bar-item" :class='{"item-active":index-bottomActive === 0}' v-for='(item,index) in bottomItems' @click='handleClick(item,index)' v-cloak>{{item.text}}</div>
+    </div>
+</div>
+</body>
+
+<script src="core/rAndroid.js?v=222"></script>
+<script type="text/javascript">
+    var id;
+    var relaodtag = "";
+    var rightclickfun = "";
+    var leftclickfun = "";
+    var id_card;
+    var isCrossscreen;
+    var isreload = true;
+    $ready = function () {
+        api.setStatusBarStyle({
+            style: 'dark'
+        });
+        var $header = $api.dom('header');
+        var $body = $api.dom('body');
+        var $footer = $api.byId('footer');
+        var footer_h = $api.offset($footer).h;
+        var body_h = $api.offset($body).h;
+        var body_w = $api.offset($body).w;
+        var rect_h = body_h - footer_h;
+        gLocalData.push('deviceW',body_w);
+        gLocalData.push('deviceH',body_h);
+        gLocalData.push('footerH',footer_h);
+       
+        var pageparms = api.pageParam;
+
+        pageparms.commonTopHeight = footer_h;
+        //是否横屏展示
+        isCrossscreen = pageparms['isCrossscreen'];
+        if (isCrossscreen) {
+
+            api.setScreenOrientation({
+                orientation: 'landscape_right'
+            });
+            windowSetSlidBackEnabled(false);
+            if(isreload){
+                setTimeout(function(){
+                    isreload = false;
+                    requstReload();
+                },1000);
+            }
+        }
+        new Vue ({
+            el:'#wrap',
+            data:{
+                bottomItems:[
+                    {text:'首页',link:'modal_tab_list01'},
+                    {text:'考勤',link:'kaoqin'},
+                    {text:'订单',link:'order'},
+                    {text:'图纸',link:'picture'},
+                ],
+            },
+            created:function() {
+                // var getActiveIndex = $_GET['active']-0;
+            },
+            mounted:function() {
+                 listenOpenFrame();
+                 this.openFrame();
+            },
+            computed:{
+                bottomActive:function() {
+                    var i = gLocalData.get('bottomActive')
+                    if ( i != undefined) {
+                        return i;
+                    } else {
+                        return 0;
+                    }
+                }
+                
+            },
+            methods:{
+                openFrame:function() {
+                    openFrameFromWin('modal_tab_list',{h:rect_h})
+                },
+                handleClick:function(item,index) {
+                    gLocalData.push('bottomActive',index);
+                     openFrameFromWin(item.link,{h:rect_h})
+                }
+            }
+        })
+        var newobject = {
+            name: 'group' + relaodtag,
+            scrollEnabled: true,
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: rect_h
+            },
+            pageParam: pageparms,
+            vScrollBarEnabled: false,
+            hScrollBarEnabled: false,
+            scaleEnabled:true,
+            bounces: false,
+            url: gConfig.HTML_PRE + api.pageParam["file"] + '.html?rs=' + Math.random()
+        };
+
+        // if (api.pageParam["file"].indexOf("ttp:") > 0 || api.pageParam["file"].indexOf("ttps:") > 0) {
+        //     if (pageparms._share) {
+        //         id_card=pageparms.id_card;
+        //         $("#shuaxingdiv").hide();
+        //         $("#rightdiv").hide();
+        //         $("#share").show();
+
+        //     }
+
+        // }
+        // if (api.pageParam.bgcolor) {
+
+        //     document.getElementById("backbtn").style.backgroundColor = "#" + api.pageParam.bgcolor;
+
+        //     document.getElementById("backbtn").style.borderBottomColor = "#" + api.pageParam.bgcolor;
+        // }
+        api.openFrame(newobject, function (ret, err) {
+        });
+        if (api.pageParam.title) {
+            doSetTitle(api.pageParam.title);
+        }
+        id = pageparms.id;
+    };
+    function doSetTitle(title) {
+        $api.byId("title").innerHTML = decodeURIComponent(title);
+    }
+
+    function share() {
+        var postdata = {
+            t: "personal",
+            id: id_card
+        };
+        shareContent(postdata);
+    }
+
+    function setRightBtn(title, fun) {
+        if (title == "-1") {
+            if (arguments[3]) {
+                document.getElementById("backbtn").style.backgroundColor = "#" + arguments[3];
+            }
+        } else {
+            $("#shuaxingdiv").hide();
+            $("#rightdiv").show();
+            $("#share").hide();
+            rightclickfun = fun;
+            $api.byId("rightdiv").innerHTML = title;
+        }
+        if (arguments[2]) {
+            leftclickfun = arguments[2];
+        }
+        if (arguments[3]) {
+            document.getElementById("backbtn").style.backgroundColor = "#" + arguments[3];
+        }
+    }
+
+    function onclickrightdiv() {
+        api.execScript({
+            name: api.winName,
+            frameName: 'group' + relaodtag,
+            script: rightclickfun + "()"
+        });
+    }
+
+    function requstReload() {
+        api.closeFrame({
+            name: 'group' + relaodtag
+        });
+        if (gLocalData.get("_curFrameGroup")) {
+            api.closeFrameGroup({
+                name: gLocalData.get("_curFrameGroup")
+            });
+        }
+        relaodtag = relaodtag + randomString(1);
+        apiready();
+    }
+
+    function randomString(len) {
+        len = len || 32;
+        var $chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+        var maxPos = $chars.length;
+        var pwd = '';
+        for (i = 0; i < len; i++) {
+            pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
+        }
+        return pwd;
+    }
+
+    // 随意切换按钮
+    function randomSwitchBtn(obj, name, index) {
+    }
+
+    function closeDiv() {
+        if (leftclickfun) {
+            api.execScript({
+                name: api.winName,
+                frameName: 'group' + relaodtag,
+                script: leftclickfun + "()"
+            });
+        } else {
+            if (isCrossscreen) {
+                api.setScreenOrientation({
+                    orientation: 'portrait_up'
+                });
+            }
+            api.closeWin({
+            });
+        }
+    }
+</script>
+</html>

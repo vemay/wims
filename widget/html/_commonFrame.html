@@ -1,0 +1,372 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=yes">
+    <meta name="format-detection" content="telephone=NO">
+    <meta name="apple-touch-fullscreen" content="YES"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+    <meta name="HandheldFriendly" content="True">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="public/font/iconfont.css?v=1"/>
+    <link rel="stylesheet" type="text/css" href="public/css/public.css"/>
+    <script src="public/js/flexible.js?v=1"></script>
+    <style>
+        #wrap {
+            height: 100%;
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-box-orient: vertical;
+            -webkit-flex-flow: column;
+            flex-flow: column;
+        }
+
+        .topbar {
+            height:1.2em;
+            font-size:.34rem;
+            display: flex;
+            justify-items: center;
+            align-content: space-around;
+            text-align: center;
+            color: #FFFFFF;
+            padding: 1em 0 .8em;
+        }
+
+        .topbar .left-btns {box-sizing:border-box;width: 20%;padding-left: 3%;text-align: left;color:#fff;}
+        .topbar .title {box-sizing:border-box;width: 60%;text-align: center;font-size:1em;}
+        .topbar .right-btns {box-sizing:border-box;width: 20%;padding-right: 3%;text-align: right;color:#fff;}
+        .topbar .icon {font-size:1.2em;}
+
+        /* .topbar .right {
+            float: left;
+            width: 45%;
+            text-align: center;
+            color: #fff;
+            padding-left: 20%;
+            font-weight: 500;
+            font-size: 1.2rem;
+        } */
+        /*.more {*/
+            /*float:right;*/
+            /*color: #fff;*/
+            /*font-size: 1em;*/
+            /*width: 30px;*/
+        /*}*/
+    </style>
+</head>
+<body>
+<div id="wrap">
+    <header class="bg-blue">
+        <div class="topbar bg-primary  activebar" id="backbtn">
+            <div class="left-btns" @click="closeDiv " v-cloak><i class="icon iconfont jk-arrow-left click-effect" v-show="showLeftBtn"></i></div>
+            <div class="title text-ellipsis" id="title" v-cloak>{{title}}</div>
+            <!--<div class="rr" id="rightdiv" style="display:none" @click="onclickrightdiv()"></div>-->
+            <div class='right-btns' :class="rBtn.name"  v-for="rBtn in rightBtns" v-if="rBtn.name && rBtn.name == rightBtn" @click="handleClick(rBtn.name)"  v-cloak>
+                <i class="icon iconfont click-effect" :class="rBtn.icon"></i>
+            </div>
+            <!--<div class="rr" id="share"  onclick="share();" style="display:none">分享</div>-->
+        </div>
+    </header>
+</div>
+</body>
+<script src="core/rAndroid.js?v=1"></script>
+<script type="text/javascript">
+  var id;
+  var relaodtag = "";
+  var id_card;
+  // var isCrossScreen;
+  var isChangeScreen;
+  var _this = null;
+  var vm = null;
+  $ready = function () {
+    vm = new Vue({
+      el: '#wrap',
+      data: {
+        header: null,
+        body: null,
+        footer: null,
+        header_h: 0,
+        body_h: 0,
+        body_w: 0,
+        rect_h: 0,
+        title: '',
+        leftBtns:['back'],
+        showLeftBtn:!0,
+        showRightBtn:!0,
+        rightBtns:[{fn:'noRightBtn'},{name:'refresh',fn:'handleRefresh',icon:'jk-refresh'},{name:'more',fn:'handleMore',icon:'jk-more'}],
+        rightBtn:'',
+        params:{},
+        rBtnParams:{},
+        isCrossScreen:-1,
+        preventReload: 0,
+        commonListener:{}
+      },
+      computed:{
+        frame:function() {
+          if (this.params) {
+            return  this.params.frame;
+          }
+        },
+        rbtnFn:function () { //得到当前右按钮对应方法
+          var rbtnFn = '';
+          this.rightBtns.forEach(function(val) {
+            if (val.name === _this.rightBtn) {
+              rbtnFn = val.fn;
+            }
+          });
+          return rbtnFn;
+        }
+      },
+      created:function () {
+        _this = this;
+
+      },
+      mounted: function () {
+        _this = this;
+        this.initBody();
+
+        this.eventListener();
+      },
+      methods: {
+        eventListener:function () {
+          this.setRightBtn();
+          this.setTitle();
+          this.setLeftBtn();
+          this.preventKeyback();
+        },
+        initBody: function () {
+          //初始化窗口信息
+          this.header = $api.dom('header');
+          this.body = $api.dom('body');
+          this.footer = $api.byId('footer');
+          this.header_h = $api.offset(this.header).h;
+          this.body_h = $api.offset(this.body).h;
+          this.body_w = $api.offset(this.body).w;
+          this.rect_h = this.body_h - this.header_h;
+          gLocalData.push('deviceW', this.body_w);
+          gLocalData.push('deviceH', this.body_h);
+          gLocalData.push('headerH', this.header_h);
+
+          this.initHead();
+          addEventListenerW('preventReload',function(ret) {
+            if (ret.value.targetFrame === _this.frame) {
+              _this.preventReload = ret.value.preventReload - 0 || 0;
+            }
+          })
+          addEventListenerW('commonListener',function(ret){
+            _this.commonListener = ret;
+          })
+        },
+        initHead: function () {
+          api.setStatusBarStyle({
+            style: 'dark'
+          });
+          this.params = api.pageParam;
+          this.params.commonTopHeight = this.header_h;
+          this.params.commonListener = this.commonListener;
+
+          //是否横屏展示
+          this.isCrossScreen = this.params['isCrossScreen'] -0;
+          this.preventReload =  this.params['preventReload']- 0 ||0;
+          this.preventKeyback();
+          if (this.isCrossScreen >= 0) {
+            if (this.isCrossScreen === 1) {
+              this.setKeyBack(); //安卓
+              windowSetSlidBackEnabled(false); //IOS
+            }
+            api.setScreenOrientation({
+              orientation: 'landscape_right'
+            });
+            addEventListenerW('viewappear',function(){
+              if (_this.preventReload === 0) {
+                _this.initBody();
+              }
+            })
+          } else {
+            if (this.isCrossScreen === -2) {
+              addEventListenerW('viewappear',function(){
+                if (_this.preventReload === 0) {
+                  _this.initBody();
+                }
+              })
+              api.setScreenOrientation({
+                orientation: 'portrait_up'
+              });
+            }
+          }
+
+          var url = gConfig.HTML_PRE + this.params["file"] + '.html?rs=' + Math.random();
+          if (this.params['pdfurl'] && this.params['pdfurl'] !== '') {
+            url = gConfig.HTML_PRE + 'public/pdf/generic/web/viewer.html?file=../../../file/test.pdf&r='+ Math.random();
+          }
+          var progress = {
+            type:"page",                //加载进度效果类型，默认值为default，取值范围为default|page，default等同于showProgress参数效果；为page时，进度效果为仿浏览器类型，固定在页面的顶部
+            title:"",               //type为default时显示的加载框标题
+            text:"",                //type为default时显示的加载框内容
+            color:"#3EA53E"                //type为page时进度条的颜色，默认值为#45C01A，支持#FFF，#FFFFFF，rgb(255,255,255)，rgba(255,255,255,1.0) 52A0FF等格式
+          };
+          var newobject = {
+            // name: 'group' + relaodtag,
+            name:_this.frame,
+            scrollEnabled: true,
+            rect: {
+              x: 0,
+              y: _this.header_h,
+              w: 'auto',
+              h: _this.rect_h
+            },
+            pageParam: this.params,
+            vScrollBarEnabled: false,
+            hScrollBarEnabled: false,
+            scaleEnabled: true,
+            progress: this.params['progress'] && progress,
+            bounces: false,
+            url:url
+          };
+          if (this.params.rbtnstr) {
+            _this.rightBtn = this.params.rbtnstr.rbtn;
+          } else {
+            _this.rightBtn = 'refresh';
+          }
+          /*if (this.params._share) {
+            id_card = this.params.id_card;
+            $("#shuaxingdiv").hide();
+            $("#rightdiv").hide();
+            $("#share").show();
+          }*/
+
+          if (api.pageParam.bgcolor) {
+
+            document.getElementById("backbtn").style.backgroundColor = "#" + api.pageParam.bgcolor;
+
+            document.getElementById("backbtn").style.borderBottomColor = "#" + api.pageParam.bgcolor;
+          }
+          api.openFrame(newobject, function (ret, err) {
+          });
+
+          id = this.params.id;
+        },
+        more:function () { //更多按钮方法
+          if (this.params.rBtnParams){
+            this.rBtnParams = decodeURIComponent(this.params.rBtnParams);
+          }
+          // this.params.rBtnParams.win = api.winName;
+          this.rBtnParams.win = api.winName;
+          api.sendEvent({
+            name: this.rbtnFn,
+            extra: this.rBtnParams
+          });
+        },
+        handleClick:function(fn) {
+          //遍历所有按钮对应的方法
+          try {
+            this[fn]();
+          } catch (e){
+            throw('按钮对应方法不存在');
+          }
+        },
+        refresh:function(){//刷新按钮方法
+          api.closeFrame({
+            name: _this.frame
+          });
+          if (gLocalData.get("_curFrameGroup")) {
+            api.closeFrameGroup({
+              name: gLocalData.get("_curFrameGroup")
+            });
+          }
+          relaodtag = relaodtag + randomString(1);
+          this.initBody();
+        },
+        setLeftBtn:function () {
+          addEventListenerW('setLeftBtn',function(ret,err) {
+            if (ret.value.win === api.winName) {
+              _this.showLeftBtn = ret.value.data.showLeftBtn;
+            }
+          })
+        },
+        setRightBtn:function() {
+          addEventListenerW('setRightBtn',function(ret,err) {
+            if (ret.value.win === api.winName) {
+              _this.rightBtn = ret.value.data.rbtn;
+              _this.rBtnParams = ret.value.data;
+            }
+          })
+          // throw('setRightBtn Error in _commonFrame.html');
+        },
+        setTitle:function () {
+          var user = gLocalData.get('user');
+          this.title = this.params.title? this.params.title : user?JSON.parse(user)['cDepName1']:'冀凯信息WIMS';
+          addEventListenerW('setTitle',function(ret,err){
+            if (ret.value.win === api.winName) {
+              _this.title = ret.value.data.title;
+            }
+          })
+        },
+        closeDiv:function () {
+          if (!this.showLeftBtn) {
+            this.setKeyBack();
+            return false;
+          }
+          if (this.isCrossScreen) {
+            api.setScreenOrientation({
+              orientation: 'portrait_up'
+            });
+          }
+          api.closeWin({});
+        },
+        setKeyBack:function() {
+          var _this = this;
+          addEventListenerW('keyback',function(){
+            _this.closeDiv();
+          })
+        },
+        preventKeyback:function () {
+          // this.params['preventkeyback'] && addEventListenerW('keyback',function(){
+          //   return false;
+          // })
+          addEventListenerW('preventKeyback',function (ret) {
+            if (ret.value.win === api.winName) {
+              addEventListenerW('keyback',function (ret,err) {
+                return false;
+              })
+            }
+          })
+        }
+      }
+
+    })
+
+  };
+
+
+  function share() {
+    var postdata = {
+      t: "personal",
+      id: id_card
+    };
+    shareContent(postdata);
+  }
+
+  function setRightBtn(title, fun) {
+    vm.setRightBtn.call(vm, title, fun);
+  }
+
+
+  function randomString(len) {
+    len = len || 32;
+    var $chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+    var maxPos = $chars.length;
+    var pwd = '';
+    for (i = 0; i < len; i++) {
+      pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
+    }
+    return pwd;
+  }
+
+
+  
+</script>
+</html>

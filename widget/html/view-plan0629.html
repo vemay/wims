@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>查询方案</title>
+    <link rel="stylesheet" href="public/css/flexible.css">
+    <link rel="stylesheet" href="public/font/iconfont.css?v=12">
+    <link rel="stylesheet" href="public/css/public.css?v=212">
+    <link rel="stylesheet" href="public/css/animate.css?v=1">
+    <link rel="stylesheet" href="public/components/jk-component.css?v=11">
+    <style>
+        #app {height:100%;position: relative;}
+        .container {height:100%;position: relative;}
+        .container .animated {-webkit-animation-duration: .3s;animation-duration: .3s;}
+        .container .container-content {box-sizing:border-box;height:100%;overflow-y:auto;padding-bottom:2rem;}
+        .query-box {position:fixed;z-index: 5;left:0;top:0;width: 100%;}
+        .retract {display:flex;justify-content:space-between;padding:.5em 5%;font-size:.34rem; background:#fff;position:relative;z-index: 99;border-bottom:1px solid #8EC1FF;}
+        .retract .text {padding-right:.5em;color:#666;}
+        .retract .icon{transition: .5s;}
+        .retract .icon-animate {transition: .5s;transform:rotate(180deg);color:#0070ff;}
+        .retract .plan-head {display: flex;align-items: center;background:#0070FF;color:#fff;border-radius: .3em;border:1px solid #0070FF;overflow: hidden;}
+        .retract .plan-head .plan-tab {font-size:.9em; padding:.2em .4em;}
+        .retract .plan-head .plan-tab.active {background:#fff;color:#0070FF;}
+        /*字段*/
+        .query-head  {padding:.5em 5%; font-size:.35rem;/*background:#8EC1FF;*/transition: .3s linear;}
+        .query-head .query-group {position: relative;}
+        .query-head .query-item {display:flex;align-items:center;justify-content:center;margin: .5em 0;padding:.4em .2em;border-radius:.2em;text-align: center;background:#f5f7f6;}
+        .query-box .current {background:#0070ff !important;color:#fff !important;}
+        .query-head .query-condition {display: flex;align-items:center;position: relative;}
+        .query-head .query-condition .query-sign {width: 4em;margin-right:.5em;}
+        .query-head .query-condition .query-value {flex:1;display: flex;}
+        .query-head .query-condition .query-value input {flex:1;}
+
+        .query-head .field {margin:1em 0;}
+        .query-head .field-content {position:absolute;left:0;top:100%;z-index:9;height:50vh;overflow-y:auto;box-sizing:border-box;width: 100%;}
+        .query-head .query-handle .jk-submit {width: 30%;margin-right:5%;font-size:inherit;}
+        .query-head .field-text {padding:.5em;background:#fff;border-bottom:1px solid #e5e5e5;color:#333;}
+
+
+        /*.data-item:last-child{border:none;}*/
+        .data-list{margin: 2em 0 ;padding:.6em 5%;font-size:.35rem;}
+        .data-item {position: relative; margin:.5em 0;padding:.5em; border-radius: .3em; background:#fff;}
+        .data-item .field {display:inline-block;margin-bottom:.6em;color:#0070FF;padding:0 .3em ;border-left: 3px solid #0070ff;}
+        .data-item .field .icon {font-size:.8em;margin-left:1em;color:#e5e5e5;}
+        .data-item .condition-box {padding:.3em .5em;border-radius: .3em;/*background:#f5f7f6;*/ }
+        .data-item .condition {display: flex;align-items: center;padding:.3em 0;border-top:1px solid #eee;}
+        .data-item .condition:first-child {border:none;}
+        .data-item .condition .sign {margin-right:1em;padding:.3em .5em;min-width:4em;color:#3EA53E;}
+        .data-item .condition .value {flex:1;}
+        .data-item.active {background:#0070ff;}
+        .data-item.active .field {color:#fff;border-color:#fff;}
+        .data-item.active .condition-box {background:#fff;}
+
+        .plan-item {position: relative; margin:1em 0; border-radius: .3em; background:#fff;}
+        .plan-item .title { display: flex;align-items: center; padding:.5em .8em;border-radius: .3em;}
+        .plan-item.active {padding:.5em;}
+        .plan-item.active .title {color:#fff;background:linear-gradient(90deg,#0070FF,#fff 70%)}
+        .plan-item .title .text {flex:1;}
+        .plan-item .mark {display:inline-block;margin-left:.5em;background: #3EA53E;color:#fff;width: .5rem;height:.5rem;;line-height: .5rem;;text-align: center;border-radius:50%;}
+        /*.plan-item .plan-field {transition:.3s;transform-origin: top; transform: scaleY(0);}
+        .plan-item.active .plan-field {transform: scaleY(0);}*/
+
+        /*侧滑删除*/
+        .handle {height:100%;display:flex;align-items: stretch;position: absolute;right:0;top:0;background:#0070FF;color:#fff;}
+        .handle .handle-item {display: flex;padding: 0 1em;height:100%;align-items: center;}
+        .plan-card {padding:.6em 5%;font-size:.35rem;}
+        .plan-card .card-section {margin-bottom: 1em;padding: 1em 3% ;border-radius:.3em;background:#fff;}
+        .plan-card .plan-name span {padding-right:1em;}
+        .plan-attr {}
+
+        .field-default {position: relative;margin-right:.5em;}
+        .field-default input{position:absolute;left:0;top:0;opacity:0;}
+        .switch {display:inline-block;padding:.3em .8em;position: relative;background:#e5e5e5;border-radius: .8em;line-height: 1em;text-align: center;}
+        .switch.active {background:#3EA53E;color:#fff;}
+
+        .plan-card .field-list { margin-top:1em;}
+        .plan-card .field-item-box {position: relative;display:inline-block;}
+        .plan-card .field-item-box input {position: absolute;left:0;top:0; opacity: 0;}
+        .plan-card .field-item {display: inline-block;margin:.5em .3em;padding:.5em .8em;background:#fff;border:1px solid #e5e5e5;border-radius: .3em;}
+        .plan-card .field-item-box input:checked+.field-item  {background:#52A0FF;color:#fff;border-color:#52A0FF;}
+        .query-start,.plan-submit {margin:0;border-radius: 0;position: fixed;bottom:0;left:0;}
+
+    </style>
+</head>
+<body>
+    <div id='app'>
+        <jk-more-list
+                :more-list="moreList"
+                v-on:addplan="addPlan"
+                v-on:updateplan="updatePlan"
+                v-on:delplan="delPlan"
+                v-on:saveplan="savePlan"
+        ></jk-more-list>
+        <div class="container" v-cloak>
+            <div class="query-box">
+            <div class="retract" >
+                <div class="plan-head text-right">
+                    <div class="plan-tab " :class="{active:tabIndex === index}" @click="switchTab(tab,index)" v-for="(tab,index) in tabs">{{tab.text}}</div>
+                </div>
+            </div>
+            </div>
+            <div class="data-list"  v-show="tabIndex===0">
+                <!--当前方案-->
+                <div class="plan-item active"  v-if="postData.defaultPlan">
+                    <div class="title ">
+                        <span v-if="postData.defaultPlan.name">{{postData.defaultPlan.name}}</span>
+                        <span v-if="!postData.defaultPlan.name">无限制</span>
+                    </div>
+                    <div class="plan-field">
+                        <div class="data-item"  v-for="(item,index) in postData.defaultPlan.list" >
+                            <p class="field">
+                                <span>{{item.field.text}}</span>
+                                <i class="icon iconfont jk-del" ></i><!--@click="del(index,plan)"-->
+                            </p>
+                            <div class="condition-box">
+                                <div class="condition" v-for="(cdt,cIndex) in item.condition">
+                                    <select class="sign" v-model="cdt.sign">
+                                        <option class="sign" v-for="sign in signs">{{sign.name}}</option>
+                                    </select>
+                                    <input class="value color-danger input-border-primary" placeholder="筛选值" v-model="cdt.value">
+                                    <i class="icon iconfont jk-pick-item" @click="pickData(-1,cIndex,'value')"></i>
+                                </div>
+                            </div>
+                        </div>
+                     </div>
+                </div>
+            </div>
+            <!--方案列表-->
+            <div class="data-list plan-list" v-show="tabIndex!==0">
+                <div class="plan-item" :class="{active:activePlanIndex === pIndex}" v-for="(plan,pIndex) in planList">
+                    <div class="title "  @click="switchPlan(plan,pIndex)">
+                        <span class="text">{{plan.name}}</span> <span class="mark color-success" v-show="plan.isDefault">默</span><span class="color-success mark" v-show="plan.isRemain">存</span></div>
+                    <div class="plan-field"  v-show="activePlanIndex === pIndex">
+                        <div class="data-item"  v-for="(item,index) in plan.list">
+                            <p class="field">{{item.field.text}} <i class="icon iconfont jk-del" @click="
+    del(index,plan)"></i></p>
+                            <div class="condition-box">
+                                <div class="condition" v-for="(cdt,cIndex) in item.condition">
+                                    <select class="sign" v-model="cdt.sign">
+                                        <option class="sign" v-for="sign in signs">{{sign.name}}</option>
+                                    </select>
+                                    <input class="value color-danger input-border-primary" placeholder="筛选值" v-model="cdt.value">
+                                    <i class="icon iconfont jk-pick-item" @click="pickData(index,cIndex,'value')"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="jk-submit query-start" @click="doSubmit">查询</div>
+        </div>
+    </div>
+</body>
+<script src="public/js/flexible.js"></script>
+
+<script src="core/rAndroid.js?v=2"></script>
+<script src="public/components/jk-component.js?v=11"></script>
+</html>

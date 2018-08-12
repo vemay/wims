@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="public/css/flexible.css">
+    <link rel="stylesheet" href="public/font/iconfont.css?v=121">
+    <link rel="stylesheet" href="public/css/public.css?v=1">
+    <script src="public/js/flexible.js"></script>
+    <script src="core/rAndroid.js?v=1"></script>
+    <style>
+        * {margin:0;padding:0;}
+        .hand-box {position: relative;}
+    </style>
+</head>
+<body>
+<div class="hand-box"><canvas id="canvas"></canvas></div>
+</body>
+<script>
+  $ready = function() {
+    function setHandLock(tag) {
+      gLocalData.push('handLockSwitch',tag);
+      return tag;
+    }
+    var serverHandLockPwd = gLocalData.get('serverHandLock',0);
+    //绘制密码
+    var canvasLeft = 0;
+    var wW = api.frameWidth;
+    var wH = api.frameHeight-10;
+    var cvs = document.getElementById('canvas');
+    cvs.width = wW;
+    cvs.height = wH;
+    var ctx = cvs.getContext('2d');
+    var w = cvs.width;
+    var h = cvs.height;
+    var r = 40;
+    var dotArr = countDot(w,h,r);
+    var lineDotArr = [];
+
+    function countDot (w,h,r) {
+      var arr = [];
+      //计算九宫格点的坐标
+      var gap = Math.round((w - 2*r*3)/4);
+      // var gap = 30;
+      if (gap <= 0) { throw ('半径太大了'); return false;}
+      for (var i = 0; i< 3; i++) {
+        for (var j = 0; j <3; j++) {
+          var xy = {};
+          xy.x = canvasLeft + ( j + 1 ) * ( gap + r ) + j * r ;
+          xy.y = canvasLeft + ( i + 1 ) * ( gap + r ) + i * r ;
+          arr.push(xy);
+        }
+      }
+      return arr;
+    }
+    function initDots (arr,c) {
+      c = c || '#D1F0FA';
+      arr && arr.length > 0 && arr.forEach(function(xy) { //9个点
+        drawDot(xy.x,xy.y,r,c);
+      });
+    }
+    initDots(dotArr);
+    function drawDot(x,y,r,c) {
+      // ctx.save();
+      ctx.beginPath();
+      ctx.fillStyle = c;
+      ctx.arc(x,y,r,0,2*Math.PI);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.fillStyle = '#ffffff';
+      ctx.arc(x,y,r-3,0,2*Math.PI);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.fillStyle = c;
+      ctx.arc(x,y,r/1.8,0,2*Math.PI);
+      ctx.closePath();
+      ctx.fill();
+
+      // ctx.restore()
+    }
+    function getTouchDot(x,y,dotArr,r) { //画线节点
+      var dis = -1;
+      var obj = {x:x,y:y,get:false};
+      dotArr.forEach(function(xy,index){
+        var dis = Math.sqrt(
+          Math.pow((xy.x-x),2) + Math.pow((xy.y-y),2)
+        );
+        if (dis>=0 && dis <= r) {
+          obj = xy;
+          obj.get = true;
+          obj.index = index;
+          return false;
+        }
+      });
+      return obj;
+    }
+
+    function drawLine (context,arr,toX,toY) {
+      context.lineJoin = 'round';
+      context.beginPath();
+      arr.forEach(function(dot,index){
+        if (index === 0 ) {
+          context.strokeStyle = '#0070ff';
+          context.lineWidth = 15;
+          context.lineCap = 'round';
+          context.moveTo(dot.x,dot.y);
+        } else {
+          context.lineWidth = 15;
+          context.lineTo(dot.x,dot.y);
+        }
+      })
+      if (toX || toY) {
+        context.lineTo(toX,toY);
+      }
+      context.stroke();
+    }
+    cvs.addEventListener('touchstart',function(e) {
+      var point = e.touches[0];
+      touchX = point.clientX;
+      touchY = point.clientY;
+    },false)
+    cvs.addEventListener('touchmove',function(e) {
+      // e = e || window.event;
+      var pointM = e.touches[0];
+      toX = pointM.clientX;
+      toY = pointM.clientY;
+      var toDot = getTouchDot(toX,toY,dotArr,r);
+      if (toDot.get && lineDotArr.indexOf(toDot) <0 ) {
+        //禁止点重复
+        lineDotArr.push(toDot);
+      }
+      ctx.clearRect(0,0,w,h);
+      drawLine(ctx,lineDotArr,toX,toY);
+      initDots(dotArr);
+      initDots(lineDotArr,'#0070ff');
+    },false);
+    cvs.addEventListener('touchend',function(e) {
+      var handsArr = getHandsArr(lineDotArr);
+      compareHands(handsArr,[0,1,4,7]);
+      lineDotArr = [];
+      setTimeout(function(){
+        ctx.clearRect(0,0,w,h);
+        initDots(dotArr);
+        initDots(lineDotArr,'#0070ff')
+      },100);
+      cvs.removeEventListener('touchmove');
+      cvs.removeEventListener('touchend');
+    },false);
+    function getHandsArr (arr) {
+      var hands = [];
+      arr.forEach(function(val) {
+        hands.push(val.index)
+      });
+      return hands;
+    }
+    var s = [0,1,4,7];
+    function compareHands (handsArr,savedArr) {
+      // myConsole(handsArr)
+      if (handsArr.length < 2   ) {
+        return false;
+      }
+      if (handsArr.length < 4) {
+        dialogAlert('手势密码长度不能低于四位');
+        return false;
+      }
+      var f = true;
+      if (handsArr.length !== savedArr.length) {
+        f = false;
+      } else {
+        for (var i = 0; i < handsArr.length; i++) {
+          if (handsArr[i]-0 !== savedArr[i]-0) {
+            f = false;
+          }
+        }
+      }
+      var str = f ? '密码正确':'密码错误';
+      f && setHandLock(f) && windowCloseThis ();
+
+      // dialogAlert(str,function ( ret ) {
+      //   f && setHandLock(f) && windowCloseThis ();
+      // }) ;
+    }
+  }
+
+
+</script>
+</html>

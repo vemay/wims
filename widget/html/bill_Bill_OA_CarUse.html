@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>用车单</title>
+  <link rel="stylesheet" href="public/css/flexible.css">
+  <link rel="stylesheet" href="public/font/iconfont.css?v=12">
+  <link rel="stylesheet" href="public/css/public.css?v=aaabbcc">
+  <link rel="stylesheet" href="public/components/jk-component.css?v=1">
+  <style>
+    .bill-head-group-divide {
+      height: .5em;
+      background: #f5f7f6;
+    }
+  
+    .check-btn {
+      position: fixed;
+      z-index: 99;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin-bottom: 0;
+    }
+  
+    /*多表体tab*/
+    .table-title {
+      display: flex;
+    }
+  
+    .tab-tag {
+      padding: .3em 6%;
+      color: #fff;
+      text-shadow: 0 0 2px #0070ff;
+    }
+  
+    .tab-tag:first-child {
+    }
+  
+    /*.tab-tag.active {background:#3952F7;color:#fff;}*/
+    .tab-tag.active {
+      background: #0070ff;
+      color: #fff;
+    }
+
+  </style>
+</head>
+<body>
+<div id='app' class="public-bill" v-cloak>
+  <jk-more-list
+    :more-list="moreList"
+    v-on:do-new="doNew"
+    v-on:do-update="doUpdate"
+    v-on:do-give-up="doGiveUp"
+    v-on:do-save="doSave"
+    v-on:do-cancel="doCancel"
+    v-on:do-submit="doSubmit"
+    v-on:do-query="doQuery"
+    v-on:do-delete="doDelete"
+  ></jk-more-list>
+  <div class="content" v-cloak v-if="billHeadValues.cCode">
+    <div class="list-title-common" v-cloak>
+      <span class="left-text">单号: <span>{{billHeadValues.cCode}}</span></span>
+      <jk-head-page
+        class="right-btns"
+        :bof="billInfo.BOF"
+        :eof="billInfo.EOF"
+        v-on:bill-change="billChange">
+      </jk-head-page>
+    </div>
+    <div class="info-main">
+      <div class="item-group"><!-- v-if="billHeadFields"-->
+        <!--<div-->
+        <!--v-for="hf in billHeadFields"-->
+        <!--&gt;-->
+        <!--  v-if="(h.type-0 === 1) || (h.type-0 === 0)"-->
+        <!--<jk-bill-entry-->
+          <!--v-if="billHeadValues"-->
+          <!--entry-type="checkbox"-->
+          <!--tag="出车确认"-->
+          <!--:value="billHeadValues.bOut"-->
+          <!--v-on:change="billHeadValues.bOut=$event"-->
+          <!--:disabled="isDisabled('bOut')"-->
+        <!--&gt;</jk-bill-entry>-->
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="用车人"
+          :value="billHeadValues.cPerName"
+          v-on:input="billHeadValues.cPerName=$event"
+          :disabled="isDisabled('cPerName')"
+          v-on:blur="doReference('cPerName',billHeadValues.cPerName)"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="enumArr.cUnitTypeArr && enumArr.cUnitTypeArr.length>0"
+          entry-type="select"
+          tag="费用承担单位"
+          :value="billHeadValues.cUnitType"
+          v-on:change="billHeadValues.cUnitType=$event"
+          :select-arr="enumArr.cUnitTypeArr"
+          :disabled="isDisabled('cUnitType')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="费用承担单位编码"
+          :value="billHeadValues.cUnitCode"
+          v-on:input="billHeadValues.cUnitCode=$event"
+          :disabled="isDisabled('cUnitCode')"
+          v-on:blur="doReference('cUnitCode',billHeadValues.cUnitCode,null,
+          {sReferRule:sReferRule[billHeadValues.cUnitType]})"
+
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="费用承担单位名称"
+          :value="billHeadValues.cUnitName"
+          v-on:input="billHeadValues.cUnitName=$event"
+          :disabled="isDisabled('cUnitName')"
+          v-on:blur="doReference('cUnitName',billHeadValues.cUnitName,null,
+          {sReferRule:sReferRule[billHeadValues.cUnitType]})"
+        ></jk-bill-entry>
+        <div class="bill-head-group-divide"></div>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="date"
+          tag="用车开始时间"
+          :value="billHeadValues.dDate_Start"
+          v-on:set-data="billHeadValues.dDate_Start=$event"
+          :disabled="isDisabled('dDate_Start')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="date"
+          tag="用车结束时间"
+          :value="billHeadValues.dDate_End"
+          v-on:set-data="billHeadValues.dDate_End=$event"
+          :disabled="isDisabled('dDate_End')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="用车原因"
+          :value="billHeadValues.cMemo"
+          v-on:input="billHeadValues.cMemo=$event"
+          :disabled="isDisabled('cMemo')"
+        ></jk-bill-entry>
+        <div class="bill-head-group-divide"></div>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="车牌号"
+          :value="billHeadValues.cCarNumber"
+          v-on:input="billHeadValues.cCarNumber=$event"
+          :disabled="isDisabled('cCarNumber')"
+          v-on:blur="doReference('cCarNumber',billHeadValues.cCarNumber)"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="车辆型号"
+          :value="billHeadValues.cCarModel"
+          v-on:input="billHeadValues.cCarModel=$event"
+          :disabled="isDisabled('cCarModel')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="车辆所属部门"
+          :value="billHeadValues.cDepName"
+          v-on:input="billHeadValues.cDepName=$event"
+          :disabled="isDisabled('cDepName')"
+        ></jk-bill-entry>
+        <!--v-on:blur="doReference('cCarNumber',billHeadValues.cCarNumber)"-->
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="司机姓名"
+          :value="billHeadValues.cPerName_SJ"
+          v-on:input="billHeadValues.cPerName_SJ=$event"
+          :disabled="isDisabled('cPerName_SJ')"
+          v-on:blur="doReference('cPerName_SJ',billHeadValues.cPerName_SJ)"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="司机公里奖"
+          :value="billHeadValues.fAwardKM"
+          v-on:input="billHeadValues.fAwardKM=$event"
+          :disabled="isDisabled('fAwardKM')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="date"
+          tag="出车时间"
+          :value="billHeadValues.dDateOut"
+          v-on:set-data="billHeadValues.dDateOut=$event"
+          :disabled="isDisabled('dDateOut')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="起始公里数"
+          :value="billHeadValues.fStartKM"
+          v-on:input="billHeadValues.fStartKM=$event"
+          :disabled="isDisabled('fStartKM')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="结束公里数"
+          :value="billHeadValues.fEndKM"
+          v-on:input="billHeadValues.fEndKM=$event"
+          :disabled="isDisabled('fEndKM')"
+          v-on:blur="getFeeInfo"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="用车公里数"
+          :value="billHeadValues.fUseKM"
+          v-on:input="billHeadValues.fUseKM=$event"
+          :disabled="isDisabled('fUseKM')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="用车费用"
+          :value="billHeadValues.fMoney"
+          v-on:input="billHeadValues.fMoney=$event"
+          :disabled="isDisabled('fMoney')"
+        ></jk-bill-entry>
+        
+        <jk-bill-entry
+          v-if="billHeadValues"
+          tag="用车费用确认"
+          :value="billHeadValues.cPerName_Affirm"
+          v-on:input="billHeadValues.cPerName_Affirm=$event"
+          :disabled="isDisabled('cPerName_Affirm')"
+          v-on:blur="doReference('cPerName_Affirm',billHeadValues.cPerName_Affirm)"
+        ></jk-bill-entry>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+<script src="public/js/flexible.js"></script>
+<script src="core/rAndroid.js?v=223"></script>
+<script src="public/components/jk-component.js?v=c66"></script>
+<script src="public/js/settingData.js?v=c66"></script>
+<script src="public/vm/commonBillVm.js?v=zzaa"></script>
+</html>

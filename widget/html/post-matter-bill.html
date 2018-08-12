@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>差旅费报销单</title>
+    <link rel="stylesheet" href="public/css/flexible.css">
+    <link rel="stylesheet" href="public/font/iconfont.css?v=12">
+    <link rel="stylesheet" href="public/css/public.css?v=112">
+    <link rel="stylesheet" href="public/components/jk-component.css?v=2">
+    <link rel="stylesheet" href="public/css/animate.css?v=21">
+    <style>
+
+    </style>
+</head>
+<body>
+<div id='app' class="public-bill" v-cloak>
+    <jk-more-list v-on:add="add" v-on:giveup="giveup" v-on:update="update" v-on:submit="submit" v-on:listclick="listclick"></jk-more-list>
+    <div class="content" v-cloak>
+        <div class="list-title-common" v-cloak>
+            <span class="left-text" v-html="status || '展示'"></span>
+            <span class="right-btns" v-show="curd">
+            <span class="page-btn  click-effect">首</span>
+            <span class="page-btn  click-effect">上</span>
+            <span class="page-btn  click-effect">下</span>
+            <span class="page-btn  click-effect">尾</span>
+        </span>
+        </div>
+        <div class="info-main">
+            <div class="item-group"  v-if="bill.head">
+                <jk-bill-entry
+                        tag="单号"
+                        :value="bill.head.no"
+                        v-on:input="bill.head.no=$event"
+                        disabled
+                ></jk-bill-entry>
+                <jk-bill-entry
+                    tag="领料单位"
+                    entry-type="select"
+                    :select-arr="departmentTypeArr"
+                    :value="bill.head.departmentType"
+                    v-on:input="bill.head.departmentType=$event"
+                    :disabled="!isEdit"
+                ></jk-bill-entry>
+                <jk-bill-entry
+                        tag="物料编码"
+                        :value="bill.head.departmentName"
+                        v-on:input="bill.head.departmentName=$event"
+                        :disabled="!isEdit"
+                        :show-pick="isEdit"
+                        v-on:set-data="pickDataCallBack"
+                        index="-1"
+                        :require="{
+                          field:'carrierName',
+                          rb:[
+                                {rf:'departmentName',bf:'name'},
+                            ]
+                        }"
+                ></jk-bill-entry>
+                <jk-bill-entry
+                        tag="领料人"
+                        :value="bill.head.user"
+                        v-on:input="bill.head.user=$event"
+                        :disabled="!isEdit"
+                        :show-pick="isEdit"
+                        v-on:set-data="pickDataCallBack"
+                        index="-1"
+                        :require="{
+                          field:'carrierName',
+                          rb:[
+                                {rf:'user',bf:'name'},
+                            ]
+                        }"
+                ></jk-bill-entry>
+            </div>
+
+            <div class="bill-list">
+                <jk-no-data :arr-source="bill.list"></jk-no-data>
+                <div class="sale-item">
+                    <div
+                         v-for="(b,index) in bill.list"
+                    >
+
+                        <!--<transition :name="index+''"-->
+                                    <!--enter-active-class="animated slideInRight"-->
+                                    <!--v-if="gt">-->
+                        <div class="item-group"  v-if="index===currentPageIndex" >
+                                <jk-bill-entry
+                                        tag="物料编码"
+                                        :value="b.matterNo"
+                                        v-on:input="b.matterNo=$event"
+                                        :disabled="!isEdit"
+                                        :show-pick="isEdit"
+                                        v-on:set-data="pickDataCallBack"
+                                        :index="index"
+                                        :require="{
+                                      field:'payBankName',
+                                      rb:[
+                                            {rf:'matterNo',bf:'card'},
+                                            {rf:'matterName',bf:'bankName'},
+                                        ]
+                                    }"
+                                ></jk-bill-entry>
+                                <jk-bill-entry
+                                    tag="物料名称"
+                                    :value="b.matterName"
+                                    v-on:input="b.matterName=$event"
+                                    :disabled="!isEdit"
+                                    :show-pick="isEdit"
+                                    v-on:set-data="pickDataCallBack"
+                                    :index="index"
+                                    :require="{
+                                      field:'payBankName',
+                                      rb:[
+                                            {rf:'matterNo',bf:'card'},
+                                            {rf:'matterName',bf:'bankName'},
+                                        ]
+                                    }"
+                            ></jk-bill-entry>
+                            <jk-bill-entry
+                                    tag="选装方案号"
+                                    :value="b.pocketPlan"
+                                    v-on:input="b.pocketPlan=$event"
+                                    :disabled="!isEdit"
+                                    :show-pick="isEdit"
+                                    v-on:set-data="pickDataCallBack"
+                                    :index="index"
+                                    :require="{
+                                  field:'payBankName',
+                                  rb:[
+                                        {rf:'pocketPlan',bf:'bankName'},
+                                    ]
+                                }"
+                                ></jk-bill-entry>
+                                <jk-bill-entry
+                                    tag="待改制属性"
+                                    entry-type="checkbox"
+                                    :value="b.toUpdate"
+                                    v-on:change="b.toUpdate=$event"
+                                    :disabled="!isEdit"
+                                ></jk-bill-entry>
+                                <jk-bill-entry
+                                        tag="规格型号"
+                                        :value="b.standard"
+                                        v-on:input="b.standard=$event"
+                                        disabled
+                                ></jk-bill-entry>
+
+                                <jk-bill-entry
+                                        tag="主计量单位"
+                                        :value="b.unit"
+                                        v-on:input="b.unit=$event"
+                                        disabled
+                                ></jk-bill-entry>
+                                <jk-bill-entry
+                                        tag="数量"
+                                        :value="b.number"
+                                        v-on:input="b.number=$event"
+                                        :disabled="!isEdit"
+                                ></jk-bill-entry>
+                                <jk-bill-entry
+                                        tag="单价"
+                                        :value="b.price"
+                                        v-on:input="b.price=$event"
+                                        :disabled="!isEdit"
+                                ></jk-bill-entry>
+                                <jk-bill-entry
+                                        tag="金额"
+                                        :value="b.money"
+                                        v-on:input="b.money=$event"
+                                        :disabled="!isEdit"
+                                ></jk-bill-entry>
+                                <jk-bill-entry
+                                        tag="仓库"
+                                        :value="b.store"
+                                        v-on:input="b.store=$event"
+                                        :disabled="!isEdit"
+                                        :show-pick="isEdit"
+                                        v-on:set-data="pickDataCallBack"
+                                        :index="index"
+                                        :require="{
+                                  field:'carrierName',
+                                  rb:[
+                                        {rf:'store',bf:'name'},
+                                    ]
+                                }"
+                                ></jk-bill-entry>
+                                <jk-bill-entry
+                                        tag="货位"
+                                        :value="b.position"
+                                        v-on:input="b.position=$event"
+                                        :disabled="!isEdit"
+                                ></jk-bill-entry>
+                                <jk-bill-entry
+                                        entry-type="date"
+                                        date-type="date"
+                                        tag="要求完成日期"
+                                        :value="b.needDate"
+                                        v-on:set-data="b.needDate=$event"
+                                        :disabled="!isEdit"
+                                ></jk-bill-entry>
+                                <jk-bill-entry
+                                        entry-type="date"
+                                        date-type="date"
+                                        tag="备料要求完成日期"
+                                        :value="b.readyNeedDate"
+                                        v-on:set-data="b.readyNeedDate=$event"
+                                        disabled
+                                ></jk-bill-entry>
+                            <jk-bill-entry
+                                    entry-type="date"
+                                    date-type="date"
+                                    tag="备料实际完成日期"
+                                    :value="b.readyTrueDate"
+                                    v-on:set-data="b.readyTrueDate=$event"
+                                    :disabled="!isEdit"
+                            ></jk-bill-entry>
+                            <jk-bill-entry
+                                    tag="批次号(质量标识码)"
+                                    :value="b.batchNo"
+                                    v-on:input="b.batchNo=$event"
+                                    :disabled="!isEdit"
+                            ></jk-bill-entry>
+                            <jk-bill-entry
+                                    tag="保管员"
+                                    :value="b.keepUser"
+                                    v-on:input="b.keepUser=$event"
+                                    :disabled="!isEdit"
+                            ></jk-bill-entry>
+                            <jk-bill-entry
+                                    tag="取料人"
+                                    :value="b.getUser"
+                                    v-on:input="b.getUser=$event"
+                                    :disabled="!isEdit"
+                            ></jk-bill-entry>
+                            <jk-bill-entry
+                                    entry-type="date"
+                                    date-type="date"
+                                    tag="取料时间"
+                                    :value="b.getDate"
+                                    v-on:set-data="b.getDate=$event"
+                                    :disabled="!isEdit"
+                            ></jk-bill-entry>
+                            <jk-bill-entry
+                                    tag="批次"
+                                    :value="b.getBatch"
+                                    v-on:input="b.getBatch=$event"
+                                    :disabled="!isEdit"
+                            ></jk-bill-entry>
+                            <jk-bill-entry
+                                    tag="备注"
+                                    :value="b.remark"
+                                    v-on:input="b.remark=$event"
+                                    :disabled="!isEdit"
+                            ></jk-bill-entry>
+                        </div>
+                        <!--</transition>-->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <jk-item-pages
+            :list="bill.list"
+            :current-page-index="currentPageIndex"
+            :show-page-btns="isEdit"
+            v-on:handle-page="handlePage"
+            v-on:add-bill-item="addBillItem"
+            v-on:del-bill-item="delBillItem"
+    ></jk-item-pages>
+    <div class="jk-submit no-radius" v-show="type==='check'" @click="changeTo('check-bill')">立即审核</div>
+</div>
+</body>
+<script src="public/js/flexible.js"></script>
+<script src="core/rAndroid.js?v=ffffd3"></script>
+<script src="public/components/jk-component.js?V=12222"></script>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>看板筛选项列表</title>
+    <link rel="stylesheet" href="public/css/flexible.css">
+    <link rel="stylesheet" href="public/font/iconfont.css?v=132">
+    <link rel="stylesheet" href="public/css/public.css?v=aaadf">
+    <link rel="stylesheet" href="public/components/jk-component.css?v=221">
+    <link rel="stylesheet" href="public/css/animate.css?v=1">
+
+    <style>
+        .app {font-size:.4rem;padding-left:10%;height:100%;}
+        .app .animated {-webkit-animation-duration: .3s;animation-duration: .3s;}
+        .transition-box {height:100%;}
+        .container {height:100%;box-sizing:border-box;padding:.5em 5% 1.5rem;background:#fff;font-size:.36rem;position: relative;z-index: 1;overflow: auto;}
+        .query-item {padding:1em 0;border-bottom:1px solid #f5f7f6;}
+        .query-item .query-item-title {margin-bottom:.5em;color:#666;}
+
+        .query-area {display: flex;align-items: center;}
+        .query-area .area-line {color:#a1a1a1;padding: 0 .3em;}
+        .query-item-value {flex:1;margin:.3em 0;padding: .3em .5em;border-radius:.3em; background:#f5f7f6;box-sizing: border-box;position: relative;}
+        .query-area .query-item-value {width: 40%;}
+        .query-area input, .query-select select {width: 100%;background:#f5f7f6;display: inline-block;color:#333;font-size: inherit;}
+
+        .query-checkbox input {position: absolute;left:0;top:0;opacity: 0;}
+        .query-checkbox .query-checkbox-text {}
+        .query-checkbox input:checked+.query-checkbox-text {color:#0070ff;}
+        .query-checkbox .icon {display:none;padding-right:.5em;}
+        .query-checkbox input:checked+.query-checkbox-text .icon {display:inline-block;}
+
+        .query-select .query-item-value {display: inline-block;flex:0;}
+        .query-select select {display: inline-block;width: auto;}
+
+        .query-button {display:flex;align-items:center;position: fixed;left:10%;right:0;bottom:0;z-index: 99;}
+        .query-button .jk-submit {flex:1;margin-bottom: 0;border-radius: 0;}
+        .query-button .jk-submit.jk-btn-empty {border:1px solid transparent;border-top:1px solid #f5f7f6;}
+
+        .from-right-enter {transform:translateX(100%);}
+        .from-right-enter-active {transition:.3s;}
+        .from-right-leave-active {transition:.3s;}
+        .from-right-leave-to {transform:translateX(100%);}
+
+        .fade-enter {opacity: 0;}
+        .fade-enter-active {transition:.3s ;}
+        .fade-leave-active {transition:.3s ;}
+        .fade-leave-to {opacity: 0;}
+
+        .mask {transition:.3s;position:fixed;left:0;right:0;top:0;bottom:0;background:rgba(0,0,0,0.6);z-index: 0;}
+    </style>
+</head>
+<body>
+    <div id='app' class="app" v-cloak>
+        <transition name="fade">
+            <div class="mask" v-show="showContent" @click="showContent=false"></div>
+        </transition>
+        <transition name="from-right"
+            v-on:after-leave="closeQuery">
+            <div class="transition-box" v-if="showContent">
+                <div class="container">
+                    <div v-for="(filter,index) in filterArr">
+                        <div class="query-item " v-if="filter.sDataType==='WSDatetime'">
+                            <div class="query-item-title">{{filter.sFieldCaption}}</div>
+                            <div class="query-area query-date">
+                                <div class="query-item-value">
+                                    <jk-date-input
+                                      class="login-select"
+                                      date-type="date"
+                                      :value="filter.value"
+                                      v-on:set-data="filter.value=$event"
+                                      :placeholder="filter.sFieldCaption"
+                                    ></jk-date-input>
+                                    <!--<input type="text" :placeholder="filter.sFieldCaption" readonly v-model="filter.value" @click="setDate('value',index)">-->
+                                </div>
+                                <div class="area-line">-</div>
+                                <div class="query-item-value">
+                                    <jk-date-input
+                                      class="login-select"
+                                      date-type="date"
+                                      :value="filter.value1"
+                                      v-on:set-data="filter.value1=$event"
+                                      :placeholder="filter.sFieldCaption"
+                                    ></jk-date-input>
+                                    <!--<input type="text" :placeholder="filter.sFieldCaption" readonly v-model="filter.value1" @click="setDate('value1',index)">-->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="query-item " v-else-if="filter.sDataType==='WSDecimal'">
+                            <div class="query-item-title">{{filter.sFieldCaption}}</div>
+                            <div class="query-area query-number">
+                                <div class="query-item-value">
+                                    <input type="number" :placeholder="filter.sFieldCaption" v-model="filter.value">
+                                </div>
+                                <div class="area-line">-</div>
+                                <div class="query-item-value">
+                                    <input type="number" :placeholder="filter.sFieldCaption" v-model="filter.value1">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="query-item" v-else-if="filter.sDataType==='WSBoolean'">
+                            <div class="query-checkbox">
+                                <label class="query-item-value">
+                                    <input type="checkbox" v-model="filter.value">
+                                    <span class="query-checkbox-text">
+                                        <i class="icon iconfont jk-true"></i><span>{{filter.sFieldCaption}}</span></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="query-item"  v-else-if="filter.sDataType==='WSEnum'">
+                            <div class="query-item-title">{{filter.sFieldCaption}}</div>
+                            <div class="query-select">
+                                <div class="query-item-value">
+                                    <select class="" v-model="filter.value" >
+                                        <option value="undefined">--请选择--</option>
+                                        <option
+                                                v-for="op in filter.enumOptions"
+                                                :value="op.ds.sEnumCode"
+                                        >
+                                            {{op.ds.sEnumValueCN}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="query-item " v-else="filter.sDataType==='WSVarchar'">
+                          <div class="query-item-title">{{filter.sFieldCaption}}</div>
+                          <div class="query-area query-input">
+                            <div class="query-item-value">
+                              <input type="text" :placeholder="filter.sFieldCaption" v-model="filter.value">
+                            </div>
+                          </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="query-button">
+                    <div class="jk-submit jk-btn-empty" @click="resetFilter">重置</div>
+                    <div class="jk-submit" @click="doFilter">查询</div>
+                </div>
+            </div>
+        </transition>
+    </div>
+</body>
+<script src="public/js/flexible.js"></script>
+<script src="core/rAndroid.js?v=fffd"></script>
+<script src="public/components/jk-component.js?v=add"></script>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="public/css/flexible.css">
+    <link rel="stylesheet" href="public/font/iconfont.css?v=1211">
+    <link rel="stylesheet" href="public/css/public.css?v=11">
+    <link rel="stylesheet" href="public/components/jk-component.css?v=1112">
+
+    <style>
+        #app .animated {-webkit-animation-duration: .3s;animation-duration: .3s;}
+        .app {padding-bottom:2rem;}
+        /*搜索结果内容*/
+        .ret-content {padding:1rem 5%;}
+        .table-item {display:block;margin-top:.4em;padding: .6em 3%;  font-size:.36rem; position: relative;background:#fff;border-radius:.3em;}
+        .table-item .bill-primary {display: flex;padding:.3em 0;}
+        .table-item .bill-name {width: 85%;}
+        .table-item .bill-user {color:#55a532;}
+        .table-item .bill-no {padding:.1em 0;color:#a5a5a5;}
+        .table-item .bill-expire {color:#a5a5a5;}
+        .table-item .tag {padding-right:1em;}
+        input:checked+.table-item {background:#D1F0FA;}
+        .dir-submit {margin:0;border-radius: 0;position: fixed;bottom:0;left:0;}
+    </style>
+</head>
+<body>
+<div id='app' class="app">
+    <jk-dir
+            :groups="groups"
+            :search-data="searchData"
+            :p-attr="pAttr"
+            :hots="hots"
+            v-on:pick-group="pickGroup"
+            v-on:search="doSearch"
+    ></jk-dir>
+    <div class="ret-content" v-show="showSearchRet" v-cloak>
+        <jk-no-data :arr-source="searchRet"></jk-no-data>
+        <label v-for="ret in searchRet" >
+            <input type="checkbox" :value="ret" v-model="pickedItems" v-if="pickType - 0 === 1">
+            <input type="radio" :value="ret" v-model="pickedItems" v-if="pickType - 0 === 0">
+            <div class="table-item" >
+                <div class="table-con bill-primary">
+                    <span class="bill-name color-success">{{ret[pAttr]}}</span>
+                </div>
+                <div class="table-con bill-no" v-for="field in fieldsArr">
+                    <span class="tag">{{field.text}}:</span>
+                    <span>{{ret[field.name]}}</span>
+                </div>
+            </div>
+        </label>
+    </div>
+    <div class="jk-submit dir-submit" @click="dirSubmit">确认</div><!--selectRet(ret)-->
+</div>
+</body>
+<script src="public/js/flexible.js"></script>
+
+<script src="core/rAndroid.js?v=f"></script>
+<script src="public/components/jk-component.js?v=21"></script>
+</html>

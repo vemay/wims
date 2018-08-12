@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="public/css/flexible.css">
+    <link rel="stylesheet" href="public/font/iconfont.css?v=1">
+    <link rel="stylesheet" href="public/css/public.css?v=1ff">
+    <link rel="stylesheet" href="public/components/jk-component.css?v=1ff">
+
+    <script src="public/js/flexible.js"></script>
+    <script src="core/rAndroid.js?v=fffd"></script>
+    <script src="public/components/jk-component.js?v=2"></script>
+
+    <style>
+        #app {font-size:.4rem;height:100%;overflow-y:auto;box-sizing: border-box;}
+        /* 顶部栏 */
+        .top-bar {display: flex;align-items: center; justify-content: space-between; padding:.6em;font-size:.35rem;color:#fff;margin-bottom:-1px ;}
+        .bar-l, .bar-r {display: flex;align-items: center;}
+        .top-bar .bar-item {padding-right:.6em;}
+        .content {}
+        .top-bar .logo {width: 3em;display: block; }
+        /* 头部选项卡 */
+        .tab {display:flex; align-items: center; justify-content: space-around; padding:2em 5% 1em;background:#0070FF;color:#fff;}
+        .tab-item {text-align: center;}
+        .tab-item .top {padding-bottom:.3em;}
+        .tab-item .icon {font-size:1.8em;color:#fff;}
+        .tab-item .text {font-size:.9em;color:#fff;}
+        /* 业务表格 */
+        .section-box {margin-top:.6rem;}
+
+        .table-title {display:flex;}
+        .tab-tag {padding:.3em 6%;color:#fff;}
+        .tab-tag:first-child {}
+        /*.tab-tag.active {background:#3952F7;color:#fff;}*/
+        .tab-tag.active {background:#0070ff;color:#fff;}
+
+        .work-table, .work-table-msg {padding:0 3%;border-bottom:1px solid #D8E8FC;background:#fff;}
+        /*.table-list, .msg-list {border:1px solid #e5e5e5;border-top:none;}*/
+        .table-head {border-bottom:1px solid #81a9c3;}
+        .table-body {height:6rem;overflow:scroll;}
+        .table-item {margin-top:.4em;padding: .6em 3%;  font-size:.36rem; position: relative;background:#f5f7f6;border-radius:.3em;}
+        .table-item .bill-primary {display: flex;padding:.3em 0;}
+        .table-item .bill-name {width: 75%;}
+        .table-item .bill-user {color:#55a532;}
+        .table-item .bill-no {padding:.1em 0;color:#a5a5a5;}
+        .table-item .bill-expire {color:#a5a5a5;}
+        .table-item .tag {padding-right:1em;}
+        /*信息中心*/
+        .work-table-msg {height:auto;}
+        .work-table-msg .msg-list {padding:.5em;}
+        .work-table-msg .msg-item {display: flex;padding:.3em;align-items: center;border-top:1px solid #e5e5e5;}
+        .work-table-msg .msg-item:first-child {border: none;}
+
+        .msg-item .msg-icon .icon {font-size:1.5em;}
+        .msg-item .msg-type {padding:0 .5em 0 .8em;}
+        .msg-item .msg-tip {flex:1;text-align: right;}
+        .line-divide {height:1px;background:#e1e1e1;margin:1em .5em;}
+    </style>
+</head>
+<body>
+<div id='app'>
+    <div class="top-bar bg-primary" v-cloak>
+        <div class="bar-l">
+            <div class='title bar-item' @click="changeTo('set-config')">
+                <img src="public/images/logo-wims.png" class='logo'>
+            </div>
+            <div class="bar-item" >
+                <!--<span class='tag'>公司:</span>-->
+                <span class='con' v-cloak>{{user.cDepName1}}</span>
+                <span class='con change-user click-effect' @click="changeUser"><i
+                        class="iconfont jk-qiehuan"></i></span>
+            </div>
+        </div>
+
+        <div class="bar-r">
+            <div class="bar-item">
+                <!--<span class='tag'>岗位:</span>-->
+                <span class='con' v-cloak>{{user.cJobName}}</span>
+            </div>
+            <div class="bar-item">
+                <!--<span class='tag'>人员:</span>-->
+                <span class='con' v-cloak>{{user.cPerName}}</span>
+            </div>
+        </div>
+    </div>
+    <div class="tab">
+        <div class="tab-item click-effect" @click="changeTo('work-bill-list')">
+            <p class="top"><i class="icon iconfont jk-yewudanju"></i></p>
+            <p class="text">业务单据</p>
+        </div>
+        <div class="tab-item click-effect" @click="changeTo('view-manager-list')">
+            <p class="top"><i class="icon iconfont jk-jiankongshuju"></i></p>
+            <p class="text">管理看板</p>
+        </div>
+        <div class="tab-item click-effect" @click="changeTo('base-info-list')">
+            <p class="top"><i class="icon iconfont jk-xinxi"></i></p>
+            <p class="text">基础信息</p>
+        </div>
+        <div class="tab-item click-effect">
+            <p class="top"><i class="icon iconfont jk-kaoqin"></i></p>
+            <p class="text">考勤打卡</p>
+        </div>
+    </div>
+    <div class="content">
+        <!--信息中心-->
+        <div class="section-box">
+            <div class="table-title linear-bg-blue-70"><span class="tab-tag">信息中心</span></div>
+            <div class="work-table-msg">
+                <div class="msg-list">
+                    <div class="msg-item click-effect" @click="changeTo('file-list')">
+                        <div class="msg-icon"><i class="icon iconfont jk-wenjian"></i></div>
+                        <div class="msg-type">文件</div>
+                        <div class="msg-num">(<span class="color-danger">2</span>)</div>
+                        <div class="msg-tip"></div>
+                    </div>
+                    <div class="msg-item click-effect" @click="changeTo('msg-list','title=通知消息')">
+                        <div class="msg-icon"><i class="icon iconfont jk-msg"></i></div>
+                        <div class="msg-type">通知消息</div>
+                        <div class="msg-num">(<span class="color-danger">10</span>)</div>
+                        <div class="msg-tip"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="section-box">
+            <!-- 待审批表格 -->
+            <div class="table-title linear-bg-blue-70">
+                    <span class="tab-tag"
+                          :class="{'active':workedTab - index == 0}"
+                          v-for="(tab,index) in workTab"
+                          @click="changeWorkTab(tab,index)"
+                    >{{tab.text}}</span>
+            </div>
+            <div class="work-table">
+                <div class="table-list">
+                    <div class="table-body"  v-if="workList.length > 0" >
+                        <jk-load-more
+                                top-pull-text=""
+                                top-drop-text=""
+                                top-loading-text=""
+                                :auto-fill="false"
+                                :top-method="loadTop"
+                                :bottom-method="loadBottom"
+                                :bottom-all-loaded="allLoaded"
+                                ref="loadmore"
+                        >
+                            <div class="table-item" v-for="work in workList" @click="clickList(work)">
+                                <div class="table-con bill-primary" v-if="work.BillType"><span class="bill-name color-primary">{{work.BillType}}</span><span
+                                        class="bill-user text-right" v-if="work.CommitPerName">{{work.CommitPerName}}</span></div>
+
+                                <div class="table-con bill-expire" v-if="work.CommitPerName"><span class="tag">到期时限:</span><span
+                                        :class="{'color-danger':work.tip}">{{work.EndDateTime | dateTimeFormat}}</span></div>
+                                <div class="table-con bill-no" v-if="work.EntityID"><span class="tag">单据编号:</span><span>{{work.BillCode}}</span></div>
+                            </div>
+                        </jk-load-more>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

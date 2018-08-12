@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="public/css/flexible.css">
+    <link rel="stylesheet" href="public/css/public.css?v=2fdf1">
+    <script src="public/js/flexible.js"></script>
+
+    <script src="core/rAndroid.js?v=fffd"></script>
+    <style>
+        . {color:#3EA53E}
+    </style>
+</head>
+<body>
+    <div id='app'>
+        <div class="jk-submit" @click="changeToNoHeader('page-index')">首页</div>
+        <div class="jk-submit" @click="changeTo('user-center')">个人主页</div>
+        <div class="jk-submit" @click="changeTo('jpush')">极光推送</div>
+        <div class="jk-submit" @click="changeTo('test')">测试</div>
+        <div class="jk-submit" @click="changeTo('check-verify')">查审列表</div>
+        <div class="jk-submit" @click="changeTo('test2')">测试222</div>
+        <div class="jk-submit" @click="changeTo('hand-lock','progress=1&preventkeyback=1')">手势密码</div>
+        <div class="jk-submit" @click="changeTo('test-echart','progress=1')">echart</div>
+    </div>
+</body>
+<script>
+$ready = function () {
+new Vue({
+     el:'#app',
+     data:{
+        msg:'',
+        Nv:null,
+        ddd:'2018-11-11',
+        fff:''
+     },
+     watch:{
+
+     },
+     mounted:function() {
+
+     },
+     methods:{
+      openNv:function() {
+        this.Nv = api.require('NVNavigationBar');
+            this.Nv.open({
+                 tyles: {
+                    orientation: 'horizontal',
+                    bg: '#6b6b6b',
+                    bgAlpha: 1,
+                    font: {
+                        size: 14,
+                        sizeSelected: 18,
+                        color: '#000',
+                        colorSelected: '#fff',
+                        alpha: 1
+                    },
+                    itemSize: {
+                        w: 90,
+                        h: 44
+                    }
+                },
+                items: [{
+                        title: '标题一',
+                        bg: '#FFE7BA',
+                        bgSelected: '#ff00000'
+                    },{
+                        title: '标题二',
+                        bg: '#FFE1FF',
+                        bgSelected: '#FFA500'
+                    },{
+                        title: '标题三',
+                        bg: '#FFAEB9',
+                        bgSelected: '#FFA500'
+                    },{
+                        title: '标题四',
+                        bg: '#CDCD00',
+                        bgSelected: '#FFA500'
+                    },{
+                        title: '标题五',
+                        bg: '#BBFFFF',
+                        bgSelected: '#FFA500'
+                    },{
+                        title: '标题六',
+                        bg: '#436EEE',
+                        bgSelected: '#FFA500'
+                    }],
+                selectedIndex: 1,
+                fixedOn: api.frameName,
+                id: 'first'
+            }, function(ret, err) {
+                // api.alert({msg:JSON.stringify(ret)});
+                if (ret.index == 2) {
+                    api.openFrameGroup({
+                        name: 'group_name',
+                        scrollEnabled: true,
+                        rect: {
+                            x:0,
+                            y:200,
+                            w:'auto',
+                            h:300
+                        },
+                        index: 0,
+                        frames: [{
+                            name: 'modal_tab_list01',
+                            url: gConfig.HTML_PRE_ROOT + 'modal_tab_list01.html'
+                        },{
+                            name: 'modal_tab_list02',
+                            url: gConfig.HTML_PRE_ROOT + 'modal_tab_list02.html'
+                        }]
+                    }, function(ret, err){
+                        // var name  = ret.name;
+                        // var index = ret.index;
+                        // alert(ret.index)
+                    });
+                } else {
+                    api.closeFrameGroup({
+                        name: 'group_name'
+                    });
+                }
+         });
+      }
+     }
+ })
+}
+</script>
+
+</html>

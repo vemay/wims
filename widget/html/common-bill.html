@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>销售订单</title>
+    <link rel="stylesheet" href="public/css/flexible.css">
+    <link rel="stylesheet" href="public/font/iconfont.css?v=12">
+    <link rel="stylesheet" href="public/css/public.css?v=221">
+    <link rel="stylesheet" href="public/components/jk-component.css?v=12">
+    <link rel="stylesheet" href="public/css/animate.css?v=21">
+    <style>
+        .bill-head-group-divide {height:.5em;background: #f5f7f6;}
+        .check-btn {position: fixed;z-index: 99;bottom:0;left:0;right:0;margin-bottom:0;}
+    </style>
+</head>
+<body>
+<div id='app' class="public-bill" v-cloak>
+    <jk-more-list v-on:add="add" v-on:giveup="giveup" v-on:update="update" v-on:submit="submit" v-on:listclick="listclick"></jk-more-list>
+    <div class="content" v-cloak>
+        <div class="list-title-common" v-cloak>
+            <span class="left-text" v-html="status || '展示'"></span>
+            <span class="right-btns" v-show="curd">
+            <span class="page-btn  click-effect">首</span>
+            <span class="page-btn  click-effect">上</span>
+            <span class="page-btn  click-effect">下</span>
+            <span class="page-btn  click-effect">尾</span>
+            </span>
+        </div>
+        <div class="info-main">
+            <div class="item-group"  v-if="billHandled.head">
+                <div
+                        v-for="h in billHandled.head"
+                >
+                    <div class="bill-head-group-divide"
+                         v-if="h.type-0 === -1"
+                    ></div>
+                    <jk-bill-entry
+                            v-if="(h.type-0 === 1) || (h.type-0 === 0)"
+                            :tag="h.tag"
+                            :value="h.value"
+                            v-on:input="h.value=$event"
+                            :disabled="h.disabled"
+
+                    ></jk-bill-entry>
+                    <jk-bill-entry
+                            v-if="h.type-0 === 11"
+                            :tag="h.tag"
+                            :value="h.value"
+                            v-on:input="h.value=$event"
+                            :disabled="h.disabled"
+                            :show-pick="isEdit"
+                            index="-1"
+                            :require="h.require"
+                            v-on:set-data="pickDataCallBack"
+                    ></jk-bill-entry>
+                    <jk-bill-entry
+                            v-if="h.type-0 === 2"
+                            entry-type="select"
+                            :tag="h.tag"
+                            :value="h.value"
+                            v-on:change="h.value=$event"
+                            :select-arr="h.selectArr"
+                            :disabled="h.disabled"
+                    ></jk-bill-entry>
+                    <jk-bill-entry
+                            v-if="h.type-0 === 3"
+                            entry-type="checkbox"
+                            :tag="h.tag"
+                            :value="h.value"
+                            v-on:change="h.value=$event"
+                            :disabled="h.disabled"
+                    ></jk-bill-entry>
+                    <jk-bill-entry
+                            v-if="(h.type-0 === 4) || (h.type-0 === 40)"
+                            entry-type="date"
+                            :tag="h.tag"
+                            :value="h.value"
+                            v-on:set-data="h.value=$event"
+                            :disabled="h.disabled"
+                    ></jk-bill-entry>
+                    <jk-bill-entry
+                            v-if="h.type-0 === 41"
+                            entry-type="date"
+                            date-type="date"
+                            :tag="h.tag"
+                            :value="h.value"
+                            v-on:set-data="h.value=$event"
+                            :disabled="h.disabled"
+                    ></jk-bill-entry>
+                    <jk-bill-entry
+                            v-if="h.type-0 === 42"
+                            entry-type="date"
+                            date-type="time"
+                            :tag="h.tag"
+                            :value="h.value"
+                            v-on:set-data="h.value=$event"
+                            :disabled="h.disabled"
+                    ></jk-bill-entry>
+                </div>
+            </div>
+            <div class="sale-list" v-if="billHandled.list">
+                <jk-no-data :arr-source="billHandled.list"></jk-no-data>
+                <div class="bill-list" v-if="billHandled.list.length>0">
+                    <div
+                            v-for="(list,index) in billHandled.list"
+                    >
+                        <!--<transition :name="index+''"-->
+                        <!--enter-active-class="animated slideInRight"-->
+                        <!--v-if="gt">-->
+                        <div class="item-group"  v-if="index===currentPageIndex">
+                            <div v-for="(b,i) in list">
+                                <div v-if="!b.length">
+                                    <div class="bill-head-group-divide"
+                                         v-if="b.type-0 === -1"
+                                    ></div>
+                                    <jk-bill-entry
+                                            v-if="b.type-0 === 1"
+                                            :tag="b.tag"
+                                            :value="b.value"
+                                            v-on:input="b.value=$event"
+                                            :disabled="b.disabled"
+                                    ></jk-bill-entry>
+                                    <jk-bill-entry
+                                            v-if="b.type-0 === 11"
+                                            :tag="b.tag"
+                                            :value="b.value"
+                                            v-on:input="b.value=$event"
+                                            :disabled="b.disabled"
+                                            :show-pick="isEdit"
+                                            :index="index"
+                                            :require="b.require"
+                                            v-on:set-data="pickDataCallBack"
+                                    ></jk-bill-entry>
+                                    <jk-bill-entry
+                                            v-if="b.type-0 === 2"
+                                            entry-type="select"
+                                            :tag="b.tag"
+                                            :value="b.value"
+                                            v-on:change="b.value=$event"
+                                            :select-arr="b.selectArr"
+                                            :disabled="b.disabled"
+                                    ></jk-bill-entry>
+                                    <jk-bill-entry
+                                            v-if="b.type-0 === 3"
+                                            entry-type="checkbox"
+                                            :tag="b.tag"
+                                            :value="b.value"
+                                            v-on:change="b.value=$event"
+                                            :disabled="b.disabled"
+                                    ></jk-bill-entry>
+                                    <jk-bill-entry
+                                            v-if="(b.type-0 === 4) || (b.type-0 === 40)"
+                                            entry-type="date"
+                                            :tag="b.tag"
+                                            :value="b.value"
+                                            v-on:set-data="b.value=$event"
+                                            :disabled="b.disabled"
+                                    ></jk-bill-entry>
+                                    <jk-bill-entry
+                                            v-if="b.type-0 === 41"
+                                            entry-type="date"
+                                            date-type="date"
+                                            :tag="b.tag"
+                                            :value="b.value"
+                                            v-on:set-data="b.value=$event"
+                                            :disabled="b.disabled"
+                                    ></jk-bill-entry>
+                                    <jk-bill-entry
+                                            v-if="b.type-0 === 42"
+                                            entry-type="date"
+                                            date-type="time"
+                                            :tag="b.tag"
+                                            :value="b.value"
+                                            v-on:set-data="b.value=$event"
+                                            :disabled="b.disabled"
+                                    ></jk-bill-entry>
+                                </div>
+                                <div v-if="b.length" style="background:#D8E8FC">
+                                    <div class="title text-center">分项标题</div>
+                                    <div v-for="(sb,si) in b">
+                                        <div class="bill-head-group-divide"
+                                             v-if="sb.type-0 === -1"
+                                        ></div>
+                                        <jk-bill-entry
+                                                v-if="sb.type-0 === 1"
+                                                :tag="sb.tag"
+                                                :value="sb.value"
+                                                v-on:input="sb.value=$event"
+                                                :disabled="sb.disabled"
+                                        ></jk-bill-entry>
+                                        <jk-bill-entry
+                                                v-if="sb.type-0 === 11"
+                                                :tag="sb.tag"
+                                                :value="sb.value"
+                                                v-on:input="sb.value=$event"
+                                                :disabled="sb.disabled"
+                                                :show-pick="isEdit"
+                                                :index="index"
+                                                :require="sb.require"
+                                                v-on:set-data="pickDataCallBack"
+                                        ></jk-bill-entry>
+                                        <jk-bill-entry
+                                                v-if="sb.type-0 === 2"
+                                                entry-type="select"
+                                                :tag="sb.tag"
+                                                :value="sb.value"
+                                                v-on:change="sb.value=$event"
+                                                :select-arr="sb.selectArr"
+                                                :disabled="sb.disabled"
+                                        ></jk-bill-entry>
+                                        <jk-bill-entry
+                                                v-if="sb.type-0 === 3"
+                                                entry-type="checkbox"
+                                                :tag="sb.tag"
+                                                :value="sb.value"
+                                                v-on:change="sb.value=$event"
+                                                :disabled="sb.disabled"
+                                        ></jk-bill-entry>
+                                        <jk-bill-entry
+                                                v-if="(sb.type-0 === 4) || (sb.type-0 === 40)"
+                                                entry-type="date"
+                                                :tag="sb.tag"
+                                                :value="sb.value"
+                                                v-on:set-data="sb.value=$event"
+                                                :disabled="sb.disabled"
+                                        ></jk-bill-entry>
+                                        <jk-bill-entry
+                                                v-if="sb.type-0 === 41"
+                                                entry-type="date"
+                                                date-type="date"
+                                                :tag="sb.tag"
+                                                :value="sb.value"
+                                                v-on:set-data="sb.value=$event"
+                                                :disabled="sb.disabled"
+                                        ></jk-bill-entry>
+                                        <jk-bill-entry
+                                                v-if="sb.type-0 === 42"
+                                                entry-type="date"
+                                                date-type="time"
+                                                :tag="sb.tag"
+                                                :value="sb.value"
+                                                v-on:set-data="sb.value=$event"
+                                                :disabled="sb.disabled"
+                                        ></jk-bill-entry>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--</transition>-->
+                    </div>
+                </div>
+             </div>
+        </div>
+    </div>
+    <jk-item-pages
+        v-if="type!=='check'"
+        :list="bill.list"
+        :current-page-index="currentPageIndex"
+        :show-page-btns="isEdit"
+        v-on:handle-page="handlePage"
+        v-on:add-bill-item="addBillItem"
+        v-on:del-bill-item="delBillItem"
+    ></jk-item-pages>
+    <div class="jk-submit no-radius check-btn"
+         v-show="type==='check'"
+         @click="changeTo('check-bill')"
+    >立即审核</div>
+</div>
+</body>
+<script src="public/js/flexible.js"></script>
+<script src="core/rAndroid.js?v=ffffd3"></script>
+<script src="public/components/jk-component.js?v=111"></script>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>客户挂账确认单</title>
+  <link rel="stylesheet" href="public/css/flexible.css">
+  <link rel="stylesheet" href="public/font/iconfont.css?v=12">
+  <link rel="stylesheet" href="public/css/public.css?v=aa122">
+  <link rel="stylesheet" href="public/components/jk-component.css?v=ffad">
+  <style>
+    .bill-head-group-divide {
+      height: .5em;
+      background: #f5f7f6;
+    }
+  
+    .check-btn {
+      position: fixed;
+      z-index: 99;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin-bottom: 0;
+    }
+  
+    /*多表体tab*/
+    .table-title {
+      display: flex;
+    }
+  
+    .tab-tag {
+      padding: .3em 6%;
+      color: #fff;
+      text-shadow: 0 0 2px #0070ff;
+    }
+  
+    .tab-tag:first-child {
+    }
+  
+    /*.tab-tag.active {background:#3952F7;color:#fff;}*/
+    .tab-tag.active {
+      background: #0070ff;
+      color: #fff;
+    }
+  
+    /*.jk-bill-entry .info-item textarea {*/
+      /*width: 100%;*/
+      /*vertical-align: middle;*/
+    /*}*/
+
+  </style>
+</head>
+<body>
+<div id='app' class="public-bill" v-cloak>
+  <jk-more-list
+    :more-list="moreList"
+    v-on:do-new="doNew"
+    v-on:do-update="doUpdate"
+    v-on:do-give-up="doGiveUp"
+    v-on:do-save="doSave"
+    v-on:do-cancel="doCancel"
+    v-on:do-submit="doSubmit"
+    v-on:do-query="doQuery"
+    v-on:do-delete="doDelete"
+  ></jk-more-list>
+  <div class="content" v-cloak v-if="billHeadValues.cCode">
+    <div class="list-title-common" v-cloak>
+      <span class="left-text">单号: <span>{{billHeadValues.cCode}}</span></span>
+      <jk-head-page
+        class="right-btns"
+        :bof="billInfo.BOF"
+        :eof="billInfo.EOF"
+        v-on:bill-change="billChange">
+      </jk-head-page>
+    </div>
+    <div class="info-main">
+      <div class="item-group"><!-- v-if="billHeadFields"-->
+        <!--<div-->
+        <!--v-for="hf in billHeadFields"-->
+        <!--&gt;-->
+        <!--  v-if="(h.type-0 === 1) || (h.type-0 === 0)"-->
+
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="客户编码"
+          :value="billHeadValues.cCusCode"
+          v-on:input="billHeadValues.cCusCode=$event"
+          :disabled="isDisabled('cCusCode')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="客户名称"
+          :value="billHeadValues.cCusName"
+          v-on:input="billHeadValues.cCusName=$event"
+          :disabled="isDisabled('cCusName')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="客户电话"
+          :value="billHeadValues.cCusPhone"
+          v-on:input="billHeadValues.cCusPhone=$event"
+          :disabled="isDisabled('cCusPhone')"
+        ></jk-bill-entry>
+        <div class="bill-head-group-divide"></div>
+  
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="发票号码"
+          :value="billHeadValues.cFPNum"
+          v-on:input="billHeadValues.cFPNum=$event"
+          :disabled="isDisabled('cFPNum')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="发票代码"
+          :value="billHeadValues.cFPCode"
+          v-on:input="billHeadValues.cFPCode=$event"
+          :disabled="isDisabled('cFPCode')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="date"
+          tag="客户挂账时间"
+          :value="billHeadValues.dConfirmDate"
+          v-on:set-data="billHeadValues.dConfirmDate=$event"
+          :disabled="isDisabled('dConfirmDate')"
+        ></jk-bill-entry>
+        <div class="bill-head-group-divide"></div>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="确认人"
+          :value="billHeadValues.cEndVerifier"
+          v-on:input="billHeadValues.cEndVerifier=$event"
+          :disabled="isDisabled('cEndVerifier')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="enumArr.cSourceArr && enumArr.cSourceArr.length>0"
+          entry-type="select"
+          tag="来源单据"
+          :value="billHeadValues.cSource"
+          v-on:change="billHeadValues.cSource=$event"
+          :select-arr="enumArr.cSourceArr"
+          :disabled="isDisabled('cSource')"
+        ></jk-bill-entry>
+        <jk-bill-entry
+          v-if="billHeadValues"
+          entry-type="textarea"
+          tag="来源单据编号"
+          :value="billHeadValues.cSourceCode"
+          v-on:input="billHeadValues.cSourceCode=$event"
+          :disabled="isDisabled('cSourceCode')"
+        ></jk-bill-entry>
+        
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+<script src="public/js/flexible.js"></script>
+<script src="core/rAndroid.js?v=223"></script>
+<script src="public/components/jk-component.js?v=22"></script>
+<script src="public/vm/commonBillVm.js?v=aadd"></script>
+</html>
